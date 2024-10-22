@@ -1,0 +1,14 @@
+launch:
+  - node:
+      pkg: map_manager
+      exec: map_manager_node_ros2
+      name: map_manager_node_ros2
+      output: screen
+
+
+  - include:
+      file: $(find-pkg-share map_providers)/launch/map_providers.yaml
+
+  - include:
+      file: $(find-pkg-share rosbridge_server)/launch/rosbridge_websocket_launch.xml
+

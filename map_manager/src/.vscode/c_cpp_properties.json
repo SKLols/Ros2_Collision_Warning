@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/opt/ros/iron/include/**",
+                "~/Sourabh_WS/ros2_ws_V2XVF/install/v2xvf_interfaces/include/v2xvf_interfaces/**",
+                "~/Sourabh_WS/ros2_ws_V2XVF/install/etsi_its_msgs/include/etsi_its_msgs/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
