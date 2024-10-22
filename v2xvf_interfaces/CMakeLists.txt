@@ -15,6 +15,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ListMapObjects.msg"
   "msg/MapObject.msg"
   "msg/AccelerationControl.msg"
+  "msg/Collision_warning/CollisionCheckResult.msg"
+  "msg/Collision_warning/ObjectMovement.msg"
+  "msg/Collision_warning/PerceivedObjectMotion.msg"
+  "msg/Collision_warning/PerceivedObjects.msg"
+  "msg/Collision_warning/SubjectVehicleMotion.msg"
   
   DEPENDENCIES ros_etsi_its_msgs
 )
