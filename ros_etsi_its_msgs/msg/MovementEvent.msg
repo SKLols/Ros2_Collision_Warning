@@ -1,0 +1,2 @@
+string event_state
+uint16 min_end_time

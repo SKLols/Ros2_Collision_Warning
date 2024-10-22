@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/jagtap/BMW_collision_detection/catkin_ws/devel/include/**",
+        "/home/jagtap/V2X-Visualization-Framework/ros/catkin_ws/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/jagtap/V2X-Visualization-Framework/ros/catkin_ws/src/ros_etsi_its_msgs/include/**",
+        "/home/jagtap/BMW_collision_detection/catkin_ws/src/ros_collision_detection/include/**",
+        "/home/jagtap/V2X-Visualization-Framework/ros/catkin_ws/src/traffic_monitoring/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
