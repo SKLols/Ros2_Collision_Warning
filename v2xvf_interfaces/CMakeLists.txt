@@ -7,6 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(ros_etsi_its_msgs REQUIRED)
 
@@ -21,7 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Collision_warning/PerceivedObjects.msg"
   "msg/Collision_warning/SubjectVehicleMotion.msg"
   
-  DEPENDENCIES ros_etsi_its_msgs
+  DEPENDENCIES ros_etsi_its_msgs geometry_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)

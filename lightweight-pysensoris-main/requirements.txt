@@ -1,0 +1,7 @@
+roslibpy==1.2.0
+PyYAML
+rospkg
+googleapis-common-protos
+numpy
+netifaces
+protobuf==3.19.0

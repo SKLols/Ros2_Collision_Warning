@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/ettusb2102/Sourabh/Ros2/V2X_viz_ROS2/ros2/catkin_ws/install/v2xvf_interfaces/include/**",
+        "/home/ettusb2102/Sourabh/Ros2/V2X_viz_ROS2/ros2/catkin_ws/install/ros_etsi_its_msgs/include/**",
+        "/opt/ros/foxy/include/**",
+        "/home/ettusb2102/Sourabh/Ros2/V2X_viz_ROS2/ros2/catkin_ws/src/lightweight-pysensoris-main/include/**",
+        "/home/ettusb2102/Sourabh/Ros2/V2X_viz_ROS2/ros2/catkin_ws/src/ros2_etsi_msgs/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

@@ -1,0 +1,35 @@
+
+movable_object.object_id.value: trj_obj.tracking_id
+
+movable_object.rectangular_box_and_accuracy.center_orientation_size.size_and_accuracy.metric_vehicle.x.value:
+    from_type: float
+    to_type: int
+    function: self._float_to_int()
+    message: trj_obj.obj_box_x
+movable_object.rectangular_box_and_accuracy.center_orientation_size.size_and_accuracy.metric_vehicle.y.value: self._float_to_int(trj_obj.obj_box_y)
+movable_object.rectangular_box_and_accuracy.center_orientation_size.size_and_accuracy.metric_vehicle.z.value: self._float_to_int(trj_obj.obj_box_z)
+
+# position in x, y, z
+movable_object.rectangular_box_and_accuracy.center_orientation_size.center_position_and_accuracy.metric_vehicle.x.value: self._float_to_int(trj_obj.obj_pose_x)
+movable_object.rectangular_box_and_accuracy.center_orientation_size.center_position_and_accuracy.metric_vehicle.y.value: self._float_to_int(trj_obj.obj_pose_y)
+movable_object.rectangular_box_and_accuracy.center_orientation_size.center_position_and_accuracy.metric_vehicle.z.value: self._float_to_int(trj_obj.obj_pose_z)
+
+# orientation of yaw, pitch, row
+movable_object.rectangular_box_and_accuracy.center_orientation_size.orientation_and_accuracy.euler_vehicle.roll.value: self._float_to_int(trj_obj.obj_orientation_x)
+movable_object.rectangular_box_and_accuracy.center_orientation_size.orientation_and_accuracy.euler_vehicle.pitch.value: self._float_to_int(trj_obj.obj_orientation_y)
+movable_object.rectangular_box_and_accuracy.center_orientation_size.orientation_and_accuracy.euler_vehicle.yaw.value: self._float_to_int(trj_obj.obj_orientation_z)
+
+# velocity in x, y, z
+movable_object.speed_and_accuracy.metric_vehicle.x.value: self._float_to_int(trj_obj.vx)
+movable_object.speed_and_accuracy.metric_vehicle.y.value: self._float_to_int(trj_obj.vy)
+movable_object.speed_and_accuracy.metric_vehicle.z.value: self._float_to_int(trj_obj.vz)
+
+# object type
+movable_object.type_and_confidence.type: self.trans_object_type(trj_obj.obj_class)
+
+# classification confidence
+movable_object.type_and_confidence.confidence.value: self._float_to_int(trj_obj.obj_class_confidence)
+
+# detection confidence
+movable_object.existence_confidence.value: self._float_to_int(trj_obj.obj_det_confidence)
+
