@@ -267,8 +267,9 @@ class CpmPublisher(Node):
 
     def __init__(self):
         #calling constructor of the node class
-        super().__init__('cpm_node')
-        self.denm_subscriber_= self.create_subscription(CollisionCheckResult, "/dummy_cpm", self.cpm_data, 10)
+        super().__init__('collision_node')
+        self.denm_subscriber_= self.create_subscription(CollisionCheckResult, "/collision_warning", self.cpm_data, 10)
+        self.denm_subscriber_= self.create_subscription(NavSatFix, "/gnss/fix", location, 10)
         self.denm_publisher_= self.create_publisher (MapObject, "/map_manager", 1000)
         self.get_logger().info("Dummy Node for CPM_Publish")
     
@@ -279,56 +280,49 @@ class CpmPublisher(Node):
 
         Header = ros_cpm_msg.header
 
-        PerceivedObjectMotion = 
-
-        #Accessing Denm Variables
-        Header = ros_cpm_msg.header
-        Stamp = Header.stamp
-        Frame_ID = Header.frame_id
+        Perceived_Object_Motion = ros_cpm_msg.perceived_object
+        Object_Type = Perceived_Object_Motion.object_type
+        Object_Movement = Perceived_Object_Motion.object_movement
+        Header_1 = Object_Movement.header
+        ID = Object_Movement.id
+        Position = Object_Movement.position
+        Position_X = Position.x
+        Position_Y = Position.y
+        Heading = Object_Movement.heading
+        Speed = Object_Movement.speed
+        Acceleration = Object_Movement.acceleration
+        X_Length = Perceived_Object_Motion.x_length
+        Y_Length = Perceived_Object_Motion.y_length
         
-        Its_Pdu_Header = ros_cpm_msg.its_header
-        Protocol_Version = Its_Pdu_Header.protocol_version
-        Message_ID = Its_Pdu_Header.message_id
-        Station_ID = Its_Pdu_Header.station_id
 
-        Management_Container = ros_cpm_msg.management
-        Object_Lat = Management_Container.event_position.latitude
-        Object_Lon = Management_Container.event_position.longitude
+        TTC = ros_cpm_msg.ttc
 
+        Result_Type = ros_cpm_msg.result_type
 
-        Situation_Container = ros_cpm_msg.situation
-        Linked_Cause_Cause_Code = Situation_Container.linked_cause.cause_code
-        Linked_Cause_Sub_Cause_Code = Situation_Container.linked_cause.sub_cause_code
-        Event_Type_Cause_Code = Situation_Container.event_type.cause_code
-        Event_Type_Sub_Cause_Code = Situation_Container.event_type.sub_cause_code
-
-        Location_Container = ros_cpm_msg.location
-
-
-        #Converting Latitude and longitude only if they are not in lat and long
-        #converted_obj_pose = xy2ll(x=Position_X, y=Position_Y, 
-        #                        orglat=location_pos.latitude, orglon=location_pos.longitude)
-        #print(converted_obj_pose)
-
-
-
-
-        #Match GPS point to Mobileye reference point i.e convert from 48.1234567 to 481234567
-        #THIPointLat = Object_Lat * 10000000   #Convert micro to degree
-        #THIPointLon = Object_Lon * 10000000
-
+        converted_obj_pose = xy2ll(x=Position_X, y=Position_Y, 
+                                orglat=location_pos.latitude, orglon=location_pos.longitude)
 
         #Publishing the above data in Map Object format 
-        cpm_msg.position.latitude = Object_Lat
-        cpm_msg.position.longitude = Object_Lon
-        cpm_msg.type = "Level0"
-        cpm_msg.source = "Test1"
-        cpm_msg.source_id = ros_cpm_msg.situation.linked_cause.cause_code
-        cpm_msg.id = "Test2"
+        cpm_msg.position.latitude = int(converted_obj_pose[0] * (10**7))
+        cpm_msg.position.longitude = int(converted_obj_pose[1] * (10**7))
+        
+        if Result_Type==0:
+            cpm_msg.type="Level0"
+        elif Result_Type==1:
+            cpm_msg.type="Level1"
+        elif Result_Type==2:
+            cpm_msg.type="Level2"
+        else:
+            cpm_msg.type="Level3"
+         
+        cpm_msg.source = "Collision_Warning"
+        cpm_msg.source_id = int(TTC)
+        cpm_msg.id = "Test_1"
         cpm_msg.expiration_time = 1.3
 
         #Publishing on map
         self.denm_publisher_.publish(cpm_msg)
+
 
 def main(args=None):
     
