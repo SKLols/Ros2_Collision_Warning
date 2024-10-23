@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from v2xvf_interfaces.msg import MapObject
 from v2xvf_interfaces.msg import CollisionCheckResult
-from ros_etsi_its_msgs.msg import DENM
+from ros_etsi_its_msgs.msg import DENM, CPM
 from sensor_msgs.msg import NavSatFix
 import math
 from math import *
