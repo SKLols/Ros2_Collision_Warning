@@ -17,11 +17,11 @@ class CollisionDetection : public rclcpp::Node
 {
     public:
         CollisionDetection()
-         : Node ("collision_detection"),
+         : Node ("collision_detection")
           //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
           //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
-          approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
-          warning_generator(collision_warning_publisher)
+          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
+          //warning_generator(collision_warning_publisher)
         {
            CollisionDetection::init(); //Publishers and subscribers
         }
