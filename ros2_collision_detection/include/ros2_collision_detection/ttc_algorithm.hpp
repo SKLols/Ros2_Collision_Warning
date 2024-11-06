@@ -12,8 +12,8 @@
  * @brief Updated from ROS 1 to ROS 2.
  */
 
-#ifndef _TTC_ALGORITHM_H_
-#define _TTC_ALGORITHM_H_
+#ifndef ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP
+#define ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP
 
 #include <map>
 #include <variant> //std::variant from the C++ Standard Library (introduced in C++17) is used instead of boost::variant.
@@ -25,7 +25,7 @@
  * 
  */
 
-typedef std::map<std::string, boost::variant<int, std::string>> parameter_map_t;
+typedef std::map<std::string, std::variant<int, std::string>> parameter_map_t;
 
 /**
  * @brief Struct that represents an object's motion.
@@ -63,10 +63,10 @@ public:
      * @param perceived_object_motion Object Motion struct representing the Perceived Object Motion.
      * @return Optional that either contains a valid Time-To-Collision or has no valid content.
      */
-    virtual boost::optional<double> calculateTTC(
+    virtual std::optional<double> calculateTTC(
         const object_motion_t &subject_object_motion,
         const object_motion_t &perceived_object_motion
     ) = 0; 
 };
 
-#endif // _TTC_ALGORITHM_H_
+#endif // ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ros2_collision_detection)
+project(ros2_collision_detection_plugins)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -17,28 +17,39 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_ros REQUIRED)
+find_package(ros2_collision_detection REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(v2xvf_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 
-add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp)
-target_include_directories(ros2_collision_detection__node PUBLIC
+pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
+
+add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
+target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(
-  ros2_collision_detection__node
+  ttc_algorithm_plugins
+  "ros2_collision_detection"
   "pluginlib"
-  "v2xvf_interfaces"
   "rclcpp"
 )
+
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(ttc_algorithm_plugins PRIVATE "ROS2_COLLISION_DETECTION_PLUGINS_BUILDING_LIBRARY")
 
 install(
   DIRECTORY include/
   DESTINATION include
 )
-
-install(TARGETS ros2_collision_detection__node
-  DESTINATION lib/${PROJECT_NAME})
+install(
+  TARGETS ttc_algorithm_plugins
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -53,6 +64,12 @@ endif()
 
 ament_export_include_directories(
   include
+)
+ament_export_libraries(
+  ttc_algorithm_plugins
+)
+ament_export_targets(
+  export_${PROJECT_NAME}
 )
 
 ament_package()
