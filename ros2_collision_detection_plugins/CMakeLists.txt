@@ -21,18 +21,67 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(ros2_collision_detection REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(GSL REQUIRED) #newly added
+find_package(rclpy REQUIRED) #newly added
+find_package(v2xvf_interfaces REQUIRED) #NEWLY ADDED
 
 pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
 
+add_library(circle_algorithm src/circle_algorithm.cpp)
+add_library(circle_equation_solver src/circle_equation_solver.cpp)
+add_library(n_circle_algorithm src/n_circle_algorithm.cpp)
 add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
+
+target_include_directories(circle_algorithm PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+target_include_directories(circle_equation_solver PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+target_include_directories(n_circle_algorithm PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
 target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
+
+ament_target_dependencies(
+  circle_algorithm
+  "ros2_collision_detection"
+  "pluginlib"
+  "rclcpp"
+  "rclpy"
+  "v2xvf_interfaces"
+)
+
+ament_target_dependencies(
+  circle_equation_solver
+  "ros2_collision_detection"
+  "pluginlib"
+  "rclcpp"
+  "rclpy"
+  "v2xvf_interfaces"
+)
+
+ament_target_dependencies(
+  n_circle_algorithm
+  "ros2_collision_detection"
+  "pluginlib"
+  "rclcpp"
+  "rclpy"
+  "v2xvf_interfaces"
+)
+
 ament_target_dependencies(
   ttc_algorithm_plugins
   "ros2_collision_detection"
   "pluginlib"
   "rclcpp"
+  "rclpy"
+  "v2xvf_interfaces"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,
@@ -44,7 +93,11 @@ install(
   DESTINATION include
 )
 install(
-  TARGETS ttc_algorithm_plugins
+  TARGETS 
+  circle_algorithm
+  circle_equation_solver
+  n_circle_algorithm
+  ttc_algorithm_plugins
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -66,6 +119,9 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
+  circle_algorithm
+  circle_equation_solver
+  n_circle_algorithm
   ttc_algorithm_plugins
 )
 ament_export_targets(

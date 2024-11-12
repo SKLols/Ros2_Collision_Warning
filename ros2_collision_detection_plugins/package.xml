@@ -12,6 +12,9 @@
   <depend>ros2_collision_detection</depend>
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>v2xvf_interfaces</depend>
+  <depend>GSL</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

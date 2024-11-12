@@ -20,6 +20,8 @@
 #include <optional> // Use std::optional instead of boost::optional
 #include <pluginlib/class_list_macros.hpp> //Must for ROS 2 as plugin library is there in ros2 
 
+namespace ros2_collision_detection {
+
 /**
  * @brief Map that includes the parameters for TTC Algorithm initialization.
  * 
@@ -68,5 +70,7 @@ public:
         const object_motion_t &perceived_object_motion
     ) = 0; 
 };
+
+} // namespace ros2_collision_detection
 
 #endif // ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP

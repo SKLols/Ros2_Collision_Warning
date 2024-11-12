@@ -48,12 +48,12 @@ int main(int argc, char ** argv)
   (void) argv;
   printf("initial setup successfully.\n");
 
-  pluginlib::ClassLoader<TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
+  pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
   
   try 
   {
     // Try to load the CircleAlgorithm plugin
-    std::shared_ptr<TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
+    std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
     printf("CircleAlgorithm plugin loaded successfully.");
   } 
   catch (pluginlib::PluginlibException& ex) 
