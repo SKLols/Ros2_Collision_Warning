@@ -14,6 +14,26 @@
  */
 
 #include "ros2_collision_detection/circle_algorithm.hpp"
+#include <pluginlib/class_list_macros.hpp>
+
+namespace ros2_collision_detection_plugins {
+
+    class CircleAlgorithmPlugins : public ros2_collision_detection::CircleAlgorithm
+    {
+        // You can override methods here if needed
+    };
+
+} // namespace ros2_collision_detection_plugins
+
+
+
+
+
+
+
+
+/*
+#include "ros2_collision_detection/circle_algorithm.hpp"
 #include <algorithm>
 #include <cmath>
 #include <sstream>
@@ -128,7 +148,11 @@ std::optional<double> CircleAlgorithm::calculateTTC(const object_motion_t &subje
 }
 
 }  // namespace ros2_collision_detection_plugins
+*/
 
+
+
+//Two times commented out
 
 /* 
 #include "ros2_collision_detection/circle_algorithm.hpp"

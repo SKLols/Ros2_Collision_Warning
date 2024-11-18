@@ -24,6 +24,7 @@ find_package(rclcpp REQUIRED)
 find_package(GSL REQUIRED) #newly added
 find_package(rclpy REQUIRED) #newly added
 find_package(v2xvf_interfaces REQUIRED) #NEWLY ADDED
+find_package(Boost REQUIRED) #Newly Added
 
 pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
 
@@ -55,6 +56,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclpy"
   "v2xvf_interfaces"
+  "Boost"
 )
 
 ament_target_dependencies(
@@ -64,6 +66,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclpy"
   "v2xvf_interfaces"
+  "Boost"
 )
 
 ament_target_dependencies(
@@ -73,6 +76,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclpy"
   "v2xvf_interfaces"
+  "Boost"
 )
 
 ament_target_dependencies(
@@ -82,6 +86,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclpy"
   "v2xvf_interfaces"
+  "Boost"
 )
 
 # Causes the visibility macros to use dllexport rather than dllimport,

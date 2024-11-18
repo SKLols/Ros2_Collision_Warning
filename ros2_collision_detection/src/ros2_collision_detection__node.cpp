@@ -7,6 +7,7 @@
 #include "v2xvf_interfaces/msg/perceived_object_motion.hpp"
 #include "v2xvf_interfaces/msg/perceived_objects.hpp"
 #include "v2xvf_interfaces/msg/subject_vehicle_motion.hpp"
+#include <boost/shared_ptr.hpp>
 
 // definition of default values for launch parameters
 #define DEFAULT_PUBLISH_TOPIC "/collision_warning"
@@ -16,50 +17,107 @@
 #define DEFAULT_SUBJECT_VEHICLE_LENGTH 5
 #define DEFAULT_SUBJECT_VEHICLE_WIDTH 1.8
 
-class CollisionDetection : public rclcpp::Node
+//class CollisionDetection : public rclcpp::Node
+//{
+//    public:
+//        CollisionDetection()
+//         : Node ("collision_detection")
+//          //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
+//          //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
+//          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
+//          //warning_generator(collision_warning_publisher)
+//        {
+//           CollisionDetection::init(); //Publishers and subscribers
+//        }
+//
+//        void init()
+//        {
+//            //main logic
+//        }
+//};
+
+int main(int argc, char **argv)
 {
-    public:
-        CollisionDetection()
-         : Node ("collision_detection")
-          //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
-          //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
-          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
-          //warning_generator(collision_warning_publisher)
-        {
-           CollisionDetection::init(); //Publishers and subscribers
+    rclcpp::init(argc, argv);  // Initialize ROS 2
+
+    // Load the plugin using ClassLoader
+    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> loader("ros2_collision_detection_plugins", "ros2_collision_detection::TTCAlgorithm");
+
+    try {
+        // Load the plugin (circle algorithm in this case)
+        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
+        
+        // Create and populate the parameter_map_t
+        ros2_collision_detection::parameter_map_t parameter_map;
+        parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
+
+        // Pass the populated map to init
+        plugin->init(parameter_map);
+
+        // Test the plugin's functionality
+        ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
+        ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
+        auto ttc = plugin->calculateTTC(subject, perceived);
+        if (ttc) {
+            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "TTC: %f", *ttc);
         }
 
-        void init()
-        {
-            //main logic
-        }
-};
+    } catch (const pluginlib::LibraryLoadException &ex) {
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to load plugin: %s", ex.what());
+    }
 
-int main(int argc, char ** argv)
-{
-    rclcpp::init(argc,argv); //initialise ros2
-
-    auto collision_detection_node = std::make_shared<CollisionDetection>();
-
-    rclcpp::spin(collision_detection_node);
     rclcpp::shutdown();
-
-  (void) argc;
-  (void) argv;
-  printf("initial setup successfully.\n");
-
-  pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
-  
-  try 
-  {
-    // Try to load the CircleAlgorithm plugin
-    std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-    printf("CircleAlgorithm plugin loaded successfully.");
-  } 
-  catch (pluginlib::PluginlibException& ex) 
-  {
-    printf("Failed to load plugin: %s \n", ex.what());
-  }
-
-  return 0;
+    return 0;
+    
 }
+
+
+
+
+
+//class CollisionDetection : public rclcpp::Node
+//{
+//    public:
+//        CollisionDetection()
+//         : Node ("collision_detection")
+//          //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
+//          //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
+//          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
+//          //warning_generator(collision_warning_publisher)
+//        {
+//           CollisionDetection::init(); //Publishers and subscribers
+//        }
+//
+//        void init()
+//        {
+//            //main logic
+//        }
+//};
+//
+//int main(int argc, char ** argv)
+//{
+//    rclcpp::init(argc,argv); //initialise ros2
+//
+//    auto collision_detection_node = std::make_shared<CollisionDetection>();
+//
+//    printf("initial setup successfully.\n");
+//
+//    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
+//  
+//    try 
+//    {
+//      // Try to load the CircleAlgorithm plugin
+//      std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
+//      printf("CircleAlgorithm plugin loaded successfully.");
+//    } 
+//    catch (pluginlib::PluginlibException& ex) 
+//    {
+//      printf("Failed to load plugin: %s \n", ex.what());
+//    }
+//
+//    rclcpp::spin(collision_detection_node);
+//    rclcpp::shutdown();
+//
+//    return 0;
+//}
+//

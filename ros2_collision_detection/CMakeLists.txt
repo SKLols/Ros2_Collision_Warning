@@ -6,7 +6,7 @@ if(NOT CMAKE_C_STANDARD)
   set(CMAKE_C_STANDARD 99)
 endif()
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -20,6 +20,7 @@ find_package(ament_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(v2xvf_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(Boost REQUIRED)  # Added Boost dependency
 
 add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp)
 target_include_directories(ros2_collision_detection__node PUBLIC
@@ -30,6 +31,12 @@ ament_target_dependencies(
   "pluginlib"
   "v2xvf_interfaces"
   "rclcpp"
+  "Boost"  # Added Boost as a dependency
+)
+
+# Link Boost libraries
+target_link_libraries(ros2_collision_detection__node
+  ${Boost_LIBRARIES}  # Link Boost shared_ptr library
 )
 
 install(

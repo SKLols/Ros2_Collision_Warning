@@ -12,7 +12,7 @@
  * @brief Updated from ROS 1 to ROS 2.
  * 
  */
-
+/*
 #include "ros2_collision_detection/circle_equation_solver.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <gsl/gsl_errno.h>
@@ -157,3 +157,4 @@ namespace circle_equation_solver
         return real_positive_roots;   
     }
 }
+*/
