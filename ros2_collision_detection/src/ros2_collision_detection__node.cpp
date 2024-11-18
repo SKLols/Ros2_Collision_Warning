@@ -41,11 +41,11 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);  // Initialize ROS 2
 
     // Load the plugin using ClassLoader
-    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
+    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
 
     try {
         // Load the plugin (circle algorithm in this case)
-        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
+        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
         plugin->initialize(10.0);
         // Create and populate the parameter_map_t
         //ros2_collision_detection::parameter_map_t parameter_map;

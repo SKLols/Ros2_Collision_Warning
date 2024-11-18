@@ -48,6 +48,9 @@ namespace ros2_collision_detection {
         //    const object_motion_t &perceived_object_motion
         //) = 0;
         virtual ~TTCAlgorithm() = default; // Virtual destructor
+
+    protected:
+        TTCAlgorithm(){}
     };
 
     class CircleAlgorithm : public TTCAlgorithm
