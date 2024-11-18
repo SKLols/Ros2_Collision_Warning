@@ -16,11 +16,16 @@
 #include "ros2_collision_detection/circle_algorithm.hpp"
 #include <pluginlib/class_list_macros.hpp>
 
-namespace ros2_collision_detection_plugins {
+namespace ros2_collision_detection___plugins {
 
-    class CircleAlgorithmPlugins : public ros2_collision_detection::CircleAlgorithm
+    class CircleAlgorithm__Plugins : public ros2_collision_detection::CircleAlgorithm
     {
-        // You can override methods here if needed
+        public:
+            CircleAlgorithm:CircleAlgorithm()
+            {
+                std::cout << "CircleAlgorithm construct created" << std::endl;
+                return 0;
+            }
     };
 
 } // namespace ros2_collision_detection_plugins

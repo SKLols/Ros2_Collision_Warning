@@ -25,6 +25,8 @@ namespace ros2_collision_detection {
     class CircleAlgorithm : public TTCAlgorithm
     {
     public:
+        CircleAlgorithm();
+        
         void init(parameter_map_t &parameter_map) override
         {
             // Initialize circle-specific parameters

@@ -41,29 +41,31 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);  // Initialize ROS 2
 
     // Load the plugin using ClassLoader
-    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> loader("ros2_collision_detection_plugins", "ros2_collision_detection::TTCAlgorithm");
+    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
 
     try {
         // Load the plugin (circle algorithm in this case)
         std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-        
+        plugin->initialize(10.0);
         // Create and populate the parameter_map_t
-        ros2_collision_detection::parameter_map_t parameter_map;
-        parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
+        //ros2_collision_detection::parameter_map_t parameter_map;
+        //parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
 
         // Pass the populated map to init
-        plugin->init(parameter_map);
+        //plugin->init(parameter_map);
 
+        printf("Circle area: %.2f\n", plugin->area());
         // Test the plugin's functionality
-        ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
-        ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
-        auto ttc = plugin->calculateTTC(subject, perceived);
-        if (ttc) {
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "TTC: %f", *ttc);
+        //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
+        //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
+        //auto ttc = plugin->calculateTTC(subject, perceived);
+        //if (ttc) {
+        //    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "TTC: %f", *ttc);
         }
 
-    } catch (const pluginlib::LibraryLoadException &ex) {
-        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to load plugin: %s", ex.what());
+    catch (pluginlib::PluginlibException& ex) {
+        printf("The plugin failed to load for some reason. Error: %s\n", ex.what());
+        //RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to load plugin: %s", ex.what());
     }
 
     rclcpp::shutdown();

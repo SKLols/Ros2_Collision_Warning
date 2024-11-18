@@ -40,12 +40,36 @@ namespace ros2_collision_detection {
     class TTCAlgorithm
     {
     public:
-        virtual void init(parameter_map_t &parameter_map) = 0;
-        virtual std::optional<double> calculateTTC(
-            const object_motion_t &subject_object_motion,
-            const object_motion_t &perceived_object_motion
-        ) = 0;
+        virtual void initialize(double side_length) = 0;
+        virtual double area() = 0;
+        //virtual void init(parameter_map_t &parameter_map) = 0;
+        //virtual std::optional<double> calculateTTC(
+        //    const object_motion_t &subject_object_motion,
+        //    const object_motion_t &perceived_object_motion
+        //) = 0;
         virtual ~TTCAlgorithm() = default; // Virtual destructor
+    };
+
+    class CircleAlgorithm : public TTCAlgorithm
+    {
+    public:
+        CircleAlgorithm();
+        
+        void initialize(double side_length) override {};
+        //void init(parameter_map_t &parameter_map) override
+        //{
+        //    // Initialize circle-specific parameters
+        //};
+
+        double area() override;
+        //std::optional<double> calculateTTC(
+        //    const object_motion_t &subject_object_motion,
+        //    const object_motion_t &perceived_object_motion
+        //) override;
+        //{
+        //    // Implement the calculation logic for Circle Algorithm
+        //    return std::optional<double>(42.0); // Placeholder value
+        //}
     };
 } // namespace ros2_collision_detection
 

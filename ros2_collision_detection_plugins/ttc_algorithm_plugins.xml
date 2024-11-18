@@ -1,4 +1,4 @@
-<library path="ttc_algorithm_plugins">
+<library path="ros2_collision_detection_plugins">
   <class name="CircleAlgorithm"
          type="ros2_collision_detection_plugins::CircleAlgorithm"
          base_class_type="ros2_collision_detection::TTCAlgorithm">
