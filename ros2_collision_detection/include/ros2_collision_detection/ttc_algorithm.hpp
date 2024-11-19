@@ -74,6 +74,29 @@ namespace ros2_collision_detection {
         //    return std::optional<double>(42.0); // Placeholder value
         //}
     };
+
+    class CircleEquationSolver : public TTCAlgorithm //Just change class name
+    {
+    public:
+        CircleEquationSolver(); //Just change this to class name
+        
+        void initialize(double side_length) override {};
+        //void init(parameter_map_t &parameter_map) override
+        //{
+        //    // Initialize circle-specific parameters
+        //};
+
+        double area() override;
+        //std::optional<double> calculateTTC(
+        //    const object_motion_t &subject_object_motion,
+        //    const object_motion_t &perceived_object_motion
+        //) override;
+        //{
+        //    // Implement the calculation logic for Circle Algorithm
+        //    return std::optional<double>(42.0); // Placeholder value
+        //}
+    };
+
 } // namespace ros2_collision_detection
 
 #endif //_TTC_ALGORITHM_HPP_

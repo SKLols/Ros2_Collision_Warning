@@ -45,8 +45,11 @@ int main(int argc, char **argv)
 
     try {
         // Load the plugin (circle algorithm in this case)
-        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-        plugin->initialize(10.0);
+        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_algorithm = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
+        circle_algorithm->initialize(10.0);
+
+        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_equation_solver = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleEquationSolver");
+        circle_equation_solver->initialize(10.0);
         // Create and populate the parameter_map_t
         //ros2_collision_detection::parameter_map_t parameter_map;
         //parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
@@ -54,7 +57,8 @@ int main(int argc, char **argv)
         // Pass the populated map to init
         //plugin->init(parameter_map);
 
-        printf("Circle area: %.2f\n", plugin->area());
+        printf("Circle area: %.2f\n", circle_algorithm->area());
+        printf("Circle Equation Solver area: %.2f\n", circle_equation_solver->area());
         // Test the plugin's functionality
         //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
         //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};

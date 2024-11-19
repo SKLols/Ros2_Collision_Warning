@@ -5,6 +5,13 @@
       The Circle Algorithm with 1 circle per object.
     </description>
   </class>
+
+  <class type="ros2_collision_detection_plugins::CircleEquationSolver"
+         base_class_type="ros2_collision_detection::TTCAlgorithm">
+    <description>
+      The Circle Equation Solver with 1 circle per object.
+    </description>
+  </class>
   
   <!--
   <class name="NCircleAlgorithm"
