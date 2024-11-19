@@ -26,7 +26,6 @@ find_package(rclpy REQUIRED) #newly added
 find_package(v2xvf_interfaces REQUIRED) #NEWLY ADDED
 find_package(Boost REQUIRED) #Newly Added
 
-pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
 
 #add_library(circle_algorithm src/circle_algorithm.cpp)
 add_library(circle_equation_solver src/circle_equation_solver.cpp)
@@ -88,6 +87,8 @@ ament_target_dependencies(
   "v2xvf_interfaces"
   "Boost"
 )
+
+pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
