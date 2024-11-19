@@ -19,6 +19,8 @@
 #include <optional>  // For std::optional
 #include <variant>   // For std::variant
 #include <string>    // For std::string
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_poly.h>
 
 namespace ros2_collision_detection {
 
@@ -42,6 +44,7 @@ namespace ros2_collision_detection {
     public:
         virtual void initialize(double side_length) = 0;
         virtual double area() = 0;
+        virtual double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj) = 0;
         //virtual void init(parameter_map_t &parameter_map) = 0;
         //virtual std::optional<double> calculateTTC(
         //    const object_motion_t &subject_object_motion,
@@ -65,6 +68,8 @@ namespace ros2_collision_detection {
         //};
 
         double area() override;
+
+        double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
         //std::optional<double> calculateTTC(
         //    const object_motion_t &subject_object_motion,
         //    const object_motion_t &perceived_object_motion
@@ -87,6 +92,8 @@ namespace ros2_collision_detection {
         //};
 
         double area() override;
+
+        double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
         //std::optional<double> calculateTTC(
         //    const object_motion_t &subject_object_motion,
         //    const object_motion_t &perceived_object_motion

@@ -22,6 +22,11 @@ find_package(v2xvf_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED)  # Added Boost dependency
 
+#Add gsl Library
+find_package( PkgConfig REQUIRED)
+
+pkg_check_modules( gsl REQUIRED gsl )
+
 add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp)
 target_include_directories(ros2_collision_detection__node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -33,6 +38,8 @@ ament_target_dependencies(
   "rclcpp"
   "Boost"  # Added Boost as a dependency
 )
+
+target_link_libraries( ros2_collision_detection__node ${gsl_LIBRARIES} )
 
 # Link Boost libraries
 target_link_libraries(ros2_collision_detection__node

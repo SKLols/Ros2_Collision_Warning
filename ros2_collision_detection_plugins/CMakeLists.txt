@@ -26,6 +26,9 @@ find_package(rclpy REQUIRED) #newly added
 find_package(v2xvf_interfaces REQUIRED) #NEWLY ADDED
 find_package(Boost REQUIRED) #Newly Added
 
+#Add gsl Library
+find_package( PkgConfig REQUIRED)
+
 
 #add_library(circle_algorithm src/circle_algorithm.cpp)
 #add_library(circle_equation_solver src/circle_equation_solver.cpp)
@@ -46,7 +49,8 @@ target_include_directories(n_circle_algorithm PUBLIC
 
 target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+  ${gsl_LIBRARIES})
 
 #ament_target_dependencies(
 #  circle_algorithm

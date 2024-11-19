@@ -8,6 +8,8 @@
 #include "v2xvf_interfaces/msg/perceived_objects.hpp"
 #include "v2xvf_interfaces/msg/subject_vehicle_motion.hpp"
 #include <boost/shared_ptr.hpp>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_poly.h>
 
 // definition of default values for launch parameters
 #define DEFAULT_PUBLISH_TOPIC "/collision_warning"
@@ -50,6 +52,13 @@ int main(int argc, char **argv)
 
         std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_equation_solver = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleEquationSolver");
         circle_equation_solver->initialize(10.0);
+
+        double accel_diff_sq_sin_adj = 2.0;  // Example value
+        double accel_diff_sq_cos_adj = 4.0;  // Example value
+
+        double result = circle_algorithm->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
+        double result_equation = circle_equation_solver->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
+
         // Create and populate the parameter_map_t
         //ros2_collision_detection::parameter_map_t parameter_map;
         //parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
@@ -59,12 +68,16 @@ int main(int argc, char **argv)
 
         printf("Circle area: %.2f\n", circle_algorithm->area());
         printf("Circle Equation Solver area: %.2f\n", circle_equation_solver->area());
+        printf("Result of computeCoefficientForPowerFour: %.2f\n", result);
+        printf("Result of equation computeCoefficientForPowerFour: %.2f\n", result_equation);
         // Test the plugin's functionality
         //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
         //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
         //auto ttc = plugin->calculateTTC(subject, perceived);
         //if (ttc) {
         //    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "TTC: %f", *ttc);
+
+        
         }
 
     catch (pluginlib::PluginlibException& ex) {
