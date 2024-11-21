@@ -47,20 +47,21 @@ int main(int argc, char **argv)
 
     // Load the plugin using ClassLoader
     pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
-
+    ros2_collision_detection::parameter_map_t param_map;
     try {
         // Load the plugin (circle algorithm in this case)
         std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_algorithm = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-        circle_algorithm->initialize(10.0);
+        circle_algorithm->initialize(param_map);
+        //circle_algorithm->initialize(10.0);
 
-        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_equation_solver = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleEquationSolver");
-        circle_equation_solver->initialize(10.0);
+        //std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_equation_solver = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleEquationSolver");
+        //circle_equation_solver->initialize(10.0);
 
-        double accel_diff_sq_sin_adj = 2.0;  // Example value
-        double accel_diff_sq_cos_adj = 4.0;  // Example value
+        //double accel_diff_sq_sin_adj = 2.0;  // Example value
+        //double accel_diff_sq_cos_adj = 4.0;  // Example value
 
-        double result = circle_algorithm->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
-        double result_equation = circle_equation_solver->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
+        //double result = circle_algorithm->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
+        //double result_equation = circle_equation_solver->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
 
         // Create and populate the parameter_map_t
         //ros2_collision_detection::parameter_map_t parameter_map;
@@ -69,10 +70,10 @@ int main(int argc, char **argv)
         // Pass the populated map to init
         //plugin->init(parameter_map);
 
-        RCLCPP_INFO(node->get_logger(), "Circle area: %.2f", circle_algorithm->area());
-        RCLCPP_INFO(node->get_logger(), "Circle Equation Solver area: %.2f", circle_equation_solver->area());
-        RCLCPP_INFO(node->get_logger(), "Result of computeCoefficientForPowerFour: %.2f", result);
-        RCLCPP_INFO(node->get_logger(), "Result of equation computeCoefficientForPowerFour: %.2f", result_equation);
+        //RCLCPP_INFO(node->get_logger(), "Circle area: %.2f", circle_algorithm->area());
+        //RCLCPP_INFO(node->get_logger(), "Circle Equation Solver area: %.2f", circle_equation_solver->area());
+        //RCLCPP_INFO(node->get_logger(), "Result of computeCoefficientForPowerFour: %.2f", result);
+        //RCLCPP_INFO(node->get_logger(), "Result of equation computeCoefficientForPowerFour: %.2f", result_equation);
         // Test the plugin's functionality
         //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
         //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};

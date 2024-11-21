@@ -44,58 +44,36 @@ namespace ros2_collision_detection {
     class TTCAlgorithm
     {
     public:
-        virtual void initialize(double side_length) = 0;
-        virtual double area() = 0;
-        virtual double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj) = 0;
-        //virtual void init(parameter_map_t &parameter_map) = 0;
-        //virtual std::optional<double> calculateTTC(
-        //    const object_motion_t &subject_object_motion,
-        //    const object_motion_t &perceived_object_motion
-        //) = 0;
+        //virtual void initialize(double side_length) = 0;
+        //virtual double area() = 0;
+        //virtual double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj) = 0;
+        virtual void initialize(parameter_map_t &parameter_map) = 0;
+        virtual std::optional<double> calculateTTC(
+            const object_motion_t &subject_object_motion,
+            const object_motion_t &perceived_object_motion
+        ) = 0;
         virtual ~TTCAlgorithm() = default; // Virtual destructor
 
     protected:
         TTCAlgorithm(){}
     };
 
-    class CircleAlgorithm : public TTCAlgorithm
-    {
-    public:
-        CircleAlgorithm();
-        
-        void initialize(double side_length) override {};
-        //void init(parameter_map_t &parameter_map) override
-        //{
-        //    // Initialize circle-specific parameters
-        //};
-
-        double area() override;
-
-        double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
-        //std::optional<double> calculateTTC(
-        //    const object_motion_t &subject_object_motion,
-        //    const object_motion_t &perceived_object_motion
-        //) override;
-        //{
-        //    // Implement the calculation logic for Circle Algorithm
-        //    return std::optional<double>(42.0); // Placeholder value
-        //}
-    };
-
-    class CircleEquationSolver : public TTCAlgorithm //Just change class name
+    class CircleEquationSolver //: public TTCAlgorithm //Just change class name
     {
     public:
         CircleEquationSolver(); //Just change this to class name
 
         //explicit CircleEquationSolver(const rclcpp::Node::SharedPtr &node);
         
-        void initialize(double side_length) override {};
-        //void init(parameter_map_t &parameter_map) override
-        //{
-        //    // Initialize circle-specific parameters
-        //};
+        //void initialize(double side_length) override {};
+        //void init(parameter_map_t &parameter_map) override {};
 
-        double area() override;
+        //std::optional<double> calculateTTC(
+        //    const object_motion_t &subject_object_motion,
+        //    const object_motion_t &perceived_object_motion
+        //) override;
+
+        //double area() override;
 
         //double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj); //This was working and tested
 
@@ -201,6 +179,69 @@ namespace ros2_collision_detection {
 
 
     };
+
+    class CircleAlgorithm : public TTCAlgorithm
+    {
+    private:
+        /**
+         * @brief Represent the Object Motion struct as a string. 
+         * 
+         * @param object_motion The Object Motion struct to be represented as string.
+         * @return String representation of the Object Motion struct.
+         */
+        std::string convertMotionStructToString(const object_motion_t &object_motion);
+
+        /**
+         * @brief Compute the Sine function value of heading.
+         * 
+         * @param heading The heading of an object.
+         * @return The Sine function result.
+         */
+	    double computeSinFromHeading(const float &heading);
+
+        /**
+         * @brief Compute the Cosine function value of heading.
+         * 
+         * @param heading The heading of an object.
+         * @return The Cosine function result.
+         */
+        double computeCosFromHeading(const float &heading);
+
+        /**
+         * @brief Adjust a value with the trigonometric value by multiplication.
+         * 
+         * @param value_to_adjust The value that is adjusted with trigonometric value.
+         * @param trigonometric_value The trigonometric value from a trigonometric function.
+         * @return The adjusted value.
+         */
+        double computeHeadingAdjustedValue(const float &value_to_adjust, const double &trigonometric_value);
+
+        /**
+         * @brief Compute the radius of the enclosing circle by using the diagonal of the rectangle.
+         * 
+         * @param length The length of the rectangle.
+         * @param width The width of the rectangle.
+         * @return The radius of the circle enclosing the rectangle.
+         */
+        double computeRadiusFromLength(const float &length, const float &width);
+
+    public:
+        CircleAlgorithm();
+        
+        //void initialize(double side_length) override {};
+        void initialize(parameter_map_t &parameter_map) override {};
+
+        //double area() override;
+
+        double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
+        std::optional<double> calculateTTC(
+            const object_motion_t &subject_object_motion,
+            const object_motion_t &perceived_object_motion
+        ) override;
+    
+    };
+
+    
 
 } // namespace ros2_collision_detection
 
