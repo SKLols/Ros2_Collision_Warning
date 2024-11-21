@@ -21,6 +21,8 @@
 #include <string>    // For std::string
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_poly.h>
+#include <array> //instead of boost::array
+#include <rclcpp/rclcpp.hpp>
 
 namespace ros2_collision_detection {
 
@@ -84,6 +86,8 @@ namespace ros2_collision_detection {
     {
     public:
         CircleEquationSolver(); //Just change this to class name
+
+        //explicit CircleEquationSolver(const rclcpp::Node::SharedPtr &node);
         
         void initialize(double side_length) override {};
         //void init(parameter_map_t &parameter_map) override
@@ -93,85 +97,111 @@ namespace ros2_collision_detection {
 
         double area() override;
 
-        double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
-        //std::optional<double> calculateTTC(
-        //    const object_motion_t &subject_object_motion,
-        //    const object_motion_t &perceived_object_motion
-        //) override;
-        //{
-        //    // Implement the calculation logic for Circle Algorithm
-        //    return std::optional<double>(42.0); // Placeholder value
-        //}
+        //double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj); //This was working and tested
+
+        /**
+        * @brief Compute the coefficient for the 4th power of variable TTC.
+        * 
+        * Compute the coefficient for variable TTC with exponent 4 using an rearranged version of the equation for the Circle Algorithm.
+        * The coefficient is computed following the formula: 
+        * [ (sin(alpha) * a_i - sin(beta) * a_j)^2 + (cos(alpha) * a_i - cos(beta) * a_j)^2 ] * 0.25 
+        * 
+        * @param accel_diff_sq_sin_adj The squared difference between the sin-adjusted accelerations of object i and object j. 
+        * @param accel_diff_sq_cos_adj The squared difference between the cos-adjusted accelerations of object i and object j.
+        * @return The coefficient for the 4th power of variable TTC.
+        */
+       double computeCoefficientForPowerFour(double &accel_diff_sq_sin_adj, double &accel_diff_sq_cos_adj);
+   
+       /**
+        * @brief Compute the coefficient for the 3rd power of variable TTC.
+        * 
+        * Compute the coefficient for variable TTC with exponent 3 using an rearranged version of the equation for the Circle Algorithm.
+        * The coefficient is computed following the formula:
+        * (sin(alpha) * a_i - sin(beta) * a_j) * (sin(alpha) * v_i - sin(beta) * v_j) + 
+        * (cos(alpha) * a_i - cos(beta) * a_j) * (cos(alpha) * v_i - cos(beta) * v_j)
+        * 
+        * @param accel_diff_sin_adj The difference between the sin-adjusted accelerations of object i and object j.
+        * @param accel_diff_cos_adj The difference between the cos-adjusted accelerations of object i and object j.
+        * @param speed_diff_sin_adj The difference between the sin-adjusted speeds of object i and object j.
+        * @param speed_diff_cos_adj The difference between the cos-adjusted speeds of object i and object j.
+        * @return The coefficient for the 3rd power of variable TTC. 
+        */
+       double computeCoefficientForPowerThree(double &accel_diff_sin_adj, double &accel_diff_cos_adj, double &speed_diff_sin_adj, double &speed_diff_cos_adj);
+   
+       /**
+        * @brief Compute the coefficient for the 2nd power of variable TTC.
+        * 
+        * Compute the coefficient for variable TTC with exponent 2 using an rearranged version of the equation for the Circle Algorithm.
+        * The coefficient is computed following the formula:
+        * (sin(alpha) * v_i - sin(beta) * v_j)^2 + (sin(alpha) * a_i - sin(beta) * a_j) * (x_i - x_j) +
+        * (cos(alpha) * v_i - cos(beta) * v_j)^2 + (cos(alpha) * a_i - cos(beta) * a_j) * (y_i - y_j)
+        * 
+        * @param accel_diff_sin_adj The difference between the sin-adjusted accelerations of object i and object j.
+        * @param accel_diff_cos_adj The difference between the cos-adjusted accelerations of object i and object j.
+        * @param speed_diff_sq_sin_adj The squared difference between the sin-adjusted speeds of object i and object j.
+        * @param speed_diff_sq_cos_adj The squared difference between the cos-adjusted speeds of object i and object j.
+        * @param center_pos_x_diff The difference between the x-coordinates of object i center and object j center.
+        * @param center_pos_y_diff The difference between the y-coordinates of object i center and object j center.
+        * @return The coefficient for the 2nd power of variable TTC.
+        */
+       double computeCoefficientForPowerTwo(double &accel_diff_sin_adj, double &accel_diff_cos_adj, double &speed_diff_sq_sin_adj, double &speed_diff_sq_cos_adj, double &center_pos_x_diff, double &center_pos_y_diff);
+   
+       /**
+        * @brief Compute the coefficient for the 1st power of variable TTC.
+        * 
+        * Compute the coefficient for variable TTC with exponent 1 using an rearranged version of the equation for the Circle Algorithm.
+        * The coefficient is computed following the formula:
+        * [ (sin(alpha) * v_i - sin(beta) * v_j) * (x_i - x_j) +
+        *   (cos(alpha) * v_i - cos(beta) * v_j) * (y_i - y_j)  ] * 2
+        * 
+        * @param speed_diff_sin_adj The difference between the sin-adjusted speeds of object i and object j.
+        * @param speed_diff_cos_adj The difference between the cos-adjusted speeds of object i and object j.
+        * @param center_pos_x_diff The difference between the x-coordinates of object i center and object j center.
+        * @param center_pos_y_diff The difference between the y-coordinates of object i center and object j center.
+        * @return The coefficient for the 1st power of variable TTC.
+        */
+       double computeCoefficientForPowerOne(double &speed_diff_sin_adj, double &speed_diff_cos_adj, double &center_pos_x_diff, double &center_pos_y_diff);
+   
+       /**
+        * @brief Compute the coefficient for the constant part of the equation.
+        * 
+        * Compute the coefficient for the constant part using an rearranged version of the equation for the Circle Algorithm.
+        * The coefficient is computed following the formula:
+        * (x_i - x_j)^2 + (y_i - y_j)^2 - (r_i + r_j)^2
+        * 
+        * @param center_pos_x_diff_sq The squared difference between the x-coordinates of object i center and object j center.
+        * @param center_pos_y_diff_sq The squared difference between the y-coordinates of object i center and object j center.
+        * @param radius_sum_sq The squared sum of the radii of object i and object j.
+        * @return double 
+        */
+       double computeCoefficientForPowerZero(double &center_pos_x_diff_sq, double &center_pos_y_diff_sq, double &radius_sum_sq);
+
+       /**
+        * @brief Find the polynomial degree that has a non-zero coefficient.
+        * 
+        * Find the highest degree of t from the polynomial P(t) = c_0 + c_1 * t^1 + c_2 * t^2 + c_3 * t^3 + c_4 * t^4
+        * where its coefficient c_* is non-zero.
+        * 
+        * @param coefficients The coefficients of the different powers of variable TTC.
+        * @return The highest degree of TTC with non-zero coefficient. 
+        */
+       int getHighestPolynomialNonZeroDegree(std::array<double, 5> &coefficients);
+
+       /**
+         * @brief Solve the rearranged polynomial equation of the Circle Algorithm for variable TTC.
+         * 
+         * The rearranged polynomial P(t) = c_0 + c_1 * t^1 + c_2 * t^2 + c_3 * t^3 + c_4 * t^4, defined by the 
+         * coefficients for the powers of t, is solved for t. Then only non-complex, real positive roots t 
+         * are returned as possible results for TTC.
+         * 
+         * @param coefficients The coefficients of the different powers of variable TTC.
+         * @return The list of all real positive roots of the polynomial.
+         */
+        std::vector<double> solvePolynomialEquationGSL(std::array<double, 5> &coefficients);
+
+
     };
 
 } // namespace ros2_collision_detection
 
 #endif //_TTC_ALGORITHM_HPP_
-
-
-
-
-
-
-//#ifndef ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP
-//#define ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP
-//
-//#include <map>
-//#include <variant> //std::variant from the C++ Standard Library (introduced in C++17) is used instead of boost::variant.
-//#include <optional> // Use std::optional instead of boost::optional
-//#include <pluginlib/class_list_macros.hpp> //Must for ROS 2 as plugin library is there in ros2 
-//
-//namespace ros2_collision_detection {
-//
-///**
-// * @brief Map that includes the parameters for TTC Algorithm initialization.
-// * 
-// */
-//
-//typedef std::map<std::string, std::variant<int, std::string>> parameter_map_t;
-//
-///**
-// * @brief Struct that represents an object's motion.
-// * 
-// */
-//typedef struct {
-//    float center_pos_x; //!< The object's center x-coordinate.
-//    float center_pos_y; //!< The object's center y-coordinate.
-//    float length;       //!< The longer side of the object.
-//    float width;        //!< The shorter side of the object.
-//    float heading;      //!< The object's heading.
-//    float speed;        //!< The object's speed.
-//    float acceleration; //!< The object's acceleration.
-//} object_motion_t;
-//
-//
-///**
-// * @brief Interface that defines the TTC calculation method that all concrete TTC Algorithm classes must implement. 
-// * 
-// */
-//class TTCAlgorithm
-//{
-//public:
-//    /**
-//     * @brief Initialize the TTC Algorithm with the passed parameters.
-//     * 
-//     * @param parameter_map A key-value map containing parameter names and parameter values.
-//     */
-//    virtual void init(parameter_map_t &parameter_map) = 0;
-//
-//    /**
-//     * @brief Calculate the Time-To-Collision between the Subject Object Motion and the Perceived Object Motion.
-//     * 
-//     * @param subject_object_motion Object Motion struct representing the Subject Object Motion.
-//     * @param perceived_object_motion Object Motion struct representing the Perceived Object Motion.
-//     * @return Optional that either contains a valid Time-To-Collision or has no valid content.
-//     */
-//    virtual std::optional<double> calculateTTC(
-//        const object_motion_t &subject_object_motion,
-//        const object_motion_t &perceived_object_motion
-//    ) = 0; 
-//};
-//
-//} // namespace ros2_collision_detection
-//
-//#endif // ROS2_COLLISION_DETECTION_TTC_ALGORITHM_HPP

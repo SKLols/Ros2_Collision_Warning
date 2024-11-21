@@ -42,6 +42,9 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);  // Initialize ROS 2
 
+    // Create a ROS 2 Node for logging
+    auto node = std::make_shared<rclcpp::Node>("collision_detection_node");
+
     // Load the plugin using ClassLoader
     pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
 
@@ -66,10 +69,10 @@ int main(int argc, char **argv)
         // Pass the populated map to init
         //plugin->init(parameter_map);
 
-        printf("Circle area: %.2f\n", circle_algorithm->area());
-        printf("Circle Equation Solver area: %.2f\n", circle_equation_solver->area());
-        printf("Result of computeCoefficientForPowerFour: %.2f\n", result);
-        printf("Result of equation computeCoefficientForPowerFour: %.2f\n", result_equation);
+        RCLCPP_INFO(node->get_logger(), "Circle area: %.2f", circle_algorithm->area());
+        RCLCPP_INFO(node->get_logger(), "Circle Equation Solver area: %.2f", circle_equation_solver->area());
+        RCLCPP_INFO(node->get_logger(), "Result of computeCoefficientForPowerFour: %.2f", result);
+        RCLCPP_INFO(node->get_logger(), "Result of equation computeCoefficientForPowerFour: %.2f", result_equation);
         // Test the plugin's functionality
         //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
         //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
@@ -84,6 +87,8 @@ int main(int argc, char **argv)
         printf("The plugin failed to load for some reason. Error: %s\n", ex.what());
         //RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to load plugin: %s", ex.what());
     }
+
+    rclcpp::spin(node);
 
     rclcpp::shutdown();
     return 0;
