@@ -12,6 +12,8 @@
  * @brief Updated from ROS 1 to ROS 2.
  */
 
+//Main file
+
 #ifndef _TTC_ALGORITHM_HPP_
 #define _TTC_ALGORITHM_HPP_
 
