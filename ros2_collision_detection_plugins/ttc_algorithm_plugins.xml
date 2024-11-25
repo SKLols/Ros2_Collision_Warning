@@ -6,6 +6,14 @@
     </description>
   </class>
 
+  <class type="ros2_collision_detection_plugins::NCircleAlgorithm"
+         base_class_type="ros2_collision_detection::TTCAlgorithm">
+    <description>
+      An extended version of the Circle Algorithm with n circles per object.
+    </description>
+  </class>
+
+  <!--
   <class type="ros2_collision_detection_plugins::CircleEquationSolver"
          base_class_type="ros2_collision_detection::TTCAlgorithm">
     <description>
@@ -13,7 +21,7 @@
     </description>
   </class>
   
-  <!--
+  
   <class name="NCircleAlgorithm"
          type="ros2_collision_detection_plugins::NCircleAlgorithm"
          base_class_type="ros2_collision_detection::TTCAlgorithm">

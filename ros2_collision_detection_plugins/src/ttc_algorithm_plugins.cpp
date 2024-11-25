@@ -5,7 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <optional>
 
-
+#define DEFAULT_CIRCLE_COUNT 1      //!< default number of circles if no circle_count is passed
 #define POLYNOMIAL_ARRAY_LENGTH 5   //!< quartic equation has variable of degree 0 to 4
 
 namespace ros2_collision_detection_plugins {
@@ -258,7 +258,7 @@ namespace ros2_collision_detection_plugins {
 
             void initialize(ros2_collision_detection::parameter_map_t &parameter_map) override
             {
-                RCLCPP_INFO(rclcpp::get_logger("CircleAlgorithm"), "CircleAlgorithm does not use initialize.");
+                RCLCPP_INFO(rclcpp::get_logger("CircleAlgorithm"), "CircleAlgorithm does  initialize.");
             }
 
             std::optional<double> calculateTTC(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion)
@@ -380,6 +380,151 @@ namespace ros2_collision_detection_plugins {
             };
     };
 
+    class NCircleAlgorithm : public ros2_collision_detection::TTCAlgorithm, public NodeInitializer
+    {
+        public:
+            NCircleAlgorithm()
+            
+            {
+                RCLCPP_INFO(node_->get_logger(), "CircleAlgorithm constructed");
+            }
+
+            std::string convertMotionStructToString(const ros2_collision_detection::object_motion_t& object_motion)
+            {
+            	std::stringstream result;
+
+                result << "center_pos_x = " << object_motion.center_pos_x << std::endl;
+            	result << "center_pos_y = " << object_motion.center_pos_y << std::endl;
+            	result << "length = " << object_motion.length << std::endl;
+            	result << "width = " << object_motion.width << std::endl;
+            	result << "heading = " << object_motion.heading << std::endl;
+            	result << "speed = " << object_motion.speed << std::endl;
+            	result << "acceleration = " << object_motion.acceleration << std::endl;
+
+                return result.str();
+            }
+
+            double computeSinFromHeading(const float &heading)
+            {
+                double result = sin(heading * M_PI / 180.0);
+                return result;
+            }
+
+            double computeCosFromHeading(const float &heading)
+            {
+                double result = cos(heading * M_PI / 180.0);
+                return result;
+            }
+
+            double computeHeadingAdjustedValue(const float &value_to_adjust, const double &trigonometric_value)
+            {
+                return trigonometric_value * value_to_adjust;
+            }
+            
+            double computeFrontBumperPos(const float &center_pos, const double &trigonometric_value, const float &length)
+            {
+                double result = center_pos + (trigonometric_value * length / 2);
+                RCLCPP_DEBUG(node_->get_logger(),"NCircleAlgorithm::computeFrontBumperPos: result: %f | from value: %f, trigonometry: %f, length: %f.", result, center_pos, trigonometric_value, length);
+                return result;
+            }
+
+            void initialize(ros2_collision_detection::parameter_map_t &parameter_map) override
+            {
+                RCLCPP_INFO(rclcpp::get_logger("NCircleAlgorithm"), "NCircleAlgorithm does  initialize.");
+            }
+
+            std::optional<double> calculateTTC(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion)
+            {   
+                // the Time-To-Collision optional return value
+                std::optional<double> ttc_optional;
+
+                // log the received object motions
+                RCLCPP_DEBUG_STREAM(node_->get_logger(),"subject object motion: \n" << convertMotionStructToString(subject_object_motion));
+                RCLCPP_DEBUG_STREAM(node_->get_logger(),"perceived object motion: \n" << convertMotionStructToString(perceived_object_motion));
+
+                if(subject_object_motion.length <= 0 || subject_object_motion.width <= 0 || perceived_object_motion.length <= 0 || perceived_object_motion.width <= 0)
+                {
+                    RCLCPP_ERROR(node_->get_logger(),"CircleAlgorithm::calculateTTC: length or width is not allowed to be zero or lower.");
+                    return ttc_optional;
+                }
+
+                if(subject_object_motion.heading < 0 || subject_object_motion.heading > 360 || perceived_object_motion.heading < 0 || perceived_object_motion.heading > 360)
+                {
+                    RCLCPP_ERROR(node_->get_logger(),"CircleAlgorithm::calculateTTC: heading value must be in range [0; 360].");
+                    return ttc_optional;
+                }
+
+                double sin_subject_obj_heading = computeSinFromHeading(subject_object_motion.heading);      //!< sin(alpha)
+                double cos_subject_obj_heading = computeCosFromHeading(subject_object_motion.heading);      //!< cos(alpha)
+                double sin_perceived_obj_heading = computeSinFromHeading(perceived_object_motion.heading);  //!< sin(beta)
+                double cos_perceived_obj_heading = computeCosFromHeading(perceived_object_motion.heading);  //!< cos(beta)
+
+                double accel_subject_obj_sin_adjusted = computeHeadingAdjustedValue(subject_object_motion.acceleration, sin_subject_obj_heading);       //!< sin(alpha) * a_i
+                double accel_subject_obj_cos_adjusted = computeHeadingAdjustedValue(subject_object_motion.acceleration, cos_subject_obj_heading);       //!< cos(alpha) * a_i
+                double accel_perceived_obj_sin_adjusted = computeHeadingAdjustedValue(perceived_object_motion.acceleration, sin_perceived_obj_heading); //!< sin(beta) * a_j
+                double accel_perceived_obj_cos_adjusted = computeHeadingAdjustedValue(perceived_object_motion.acceleration, cos_perceived_obj_heading); //!< cos(beta) * a_j
+
+                double speed_subject_obj_sin_adjusted = computeHeadingAdjustedValue(subject_object_motion.speed, sin_subject_obj_heading);          //!< sin(alpha) * v_i
+                double speed_subject_obj_cos_adjusted = computeHeadingAdjustedValue(subject_object_motion.speed, cos_subject_obj_heading);          //!< cos(alpha) * v_i
+                double speed_perceived_obj_sin_adjusted = computeHeadingAdjustedValue(perceived_object_motion.speed, sin_perceived_obj_heading);    //!< sin(beta) * v_j
+                double speed_perceived_obj_cos_adjusted = computeHeadingAdjustedValue(perceived_object_motion.speed, cos_perceived_obj_heading);    //!< cos(beta) * v_j
+
+                //double radius_subject_obj = computeRadiusFromLength(subject_object_motion.length, subject_object_motion.width);        //!< r_i
+                //double radius_perceived_obj = computeRadiusFromLength(perceived_object_motion.length, perceived_object_motion.width);  //!< r_j
+
+                // differences between subject object's values and perceived object's values
+                double accel_diff_sin_adjusted = accel_subject_obj_sin_adjusted - accel_perceived_obj_sin_adjusted; //!< sin(alpha) * a_i - sin(beta) * a_j
+                double accel_diff_cos_adjusted = accel_subject_obj_cos_adjusted - accel_perceived_obj_cos_adjusted; //!< cos(alpha) * a_i - cos(beta) * a_j
+                double speed_diff_sin_adjusted = speed_subject_obj_sin_adjusted - speed_perceived_obj_sin_adjusted; //!< sin(alpha) * v_i - sin(beta) * v_j
+                double speed_diff_cos_adjusted = speed_subject_obj_cos_adjusted - speed_perceived_obj_cos_adjusted; //!< cos(alpha) * v_i - cos(beta) * v_j
+                double center_pos_x_diff = subject_object_motion.center_pos_x - perceived_object_motion.center_pos_x;   //!< x_i - x_j
+                double center_pos_y_diff = subject_object_motion.center_pos_y - perceived_object_motion.center_pos_y;   //!< y_i - y_j
+
+                // sum of the radii of subject object and perceived object
+                //double radius_sum = radius_subject_obj + radius_perceived_obj;  //!< r_i + r_j
+
+                // squares of the differences
+                double accel_diff_square_sin_adjusted = accel_diff_sin_adjusted * accel_diff_sin_adjusted;  //!< (sin(alpha) * a_i - sin(beta) * a_j)^2
+                double accel_diff_square_cos_adjusted = accel_diff_cos_adjusted * accel_diff_cos_adjusted;  //!< (cos(alpha) * a_i - cos(beta) * a_j)^2
+                double speed_diff_square_sin_adjusted = speed_diff_sin_adjusted * speed_diff_sin_adjusted;  //!< (sin(alpha) * v_i - sin(beta) * v_j)^2
+                double speed_diff_square_cos_adjusted = speed_diff_cos_adjusted * speed_diff_cos_adjusted;  //!< (cos(alpha) * v_i - cos(beta) * v_j)^2
+                double center_pos_x_diff_square = center_pos_x_diff * center_pos_x_diff;    //!< (x_i - x_j)^2
+                double center_pos_y_diff_square = center_pos_y_diff * center_pos_y_diff;    //!< (y_i - y_j)^2
+
+                // square of the sum of the radii
+                //double radius_sum_square = radius_sum * radius_sum; //!< (r_i + r_j)^2
+
+                // prepare coefficients of the polynomial P(t) = b_0 + b_1 * t^1 + b_2 * t^2 + b_3 * t^3 + b_4 * t^4
+                // stored upwards from least power: [b_0, b_1, b_2, b_3, b_4]
+
+                CircleEquationSolver CES;
+                std::array<double, POLYNOMIAL_ARRAY_LENGTH> coefficients;
+                //coefficients[0] = CES.computeCoefficientForPowerZero(center_pos_x_diff_square, center_pos_y_diff_square, radius_sum_square);
+                coefficients[1] = CES.computeCoefficientForPowerOne(speed_diff_sin_adjusted, speed_diff_cos_adjusted, center_pos_x_diff, center_pos_y_diff);
+                coefficients[2] = CES.computeCoefficientForPowerTwo(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_square_sin_adjusted, speed_diff_square_cos_adjusted, center_pos_x_diff, center_pos_y_diff);
+                coefficients[3] = CES.computeCoefficientForPowerThree(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_sin_adjusted, speed_diff_cos_adjusted);
+                coefficients[4] = CES.computeCoefficientForPowerFour(accel_diff_square_sin_adjusted, accel_diff_square_cos_adjusted);
+
+                // compute the real roots of the polynomial equation with GSL
+                std::vector<double> real_positive_roots = CES.solvePolynomialEquationGSL(coefficients);
+
+                if (real_positive_roots.empty())
+                {
+                    // no real positive root found --> no TTC could be computed
+                    RCLCPP_DEBUG(node_->get_logger(),"CircleAlgorithm::calculateTTC: no real positive roots found.");
+
+                    // return empty optional
+                    return ttc_optional;
+                }
+
+                // smallest real positive root is the TTC
+                ttc_optional = *std::min_element(real_positive_roots.begin(), real_positive_roots.end());
+
+                return ttc_optional;
+            
+            };
+    };
+
     
 
 } // namespace ros2_collision_detection_plugins
@@ -388,6 +533,6 @@ namespace ros2_collision_detection_plugins {
 #include <pluginlib/class_list_macros.hpp>
 
 PLUGINLIB_EXPORT_CLASS(ros2_collision_detection_plugins::CircleAlgorithm, ros2_collision_detection::TTCAlgorithm)
-//PLUGINLIB_EXPORT_CLASS(ros2_collision_detection_plugins::CircleEquationSolver, ros2_collision_detection::TTCAlgorithm)
+PLUGINLIB_EXPORT_CLASS(ros2_collision_detection_plugins::NCircleAlgorithm, ros2_collision_detection::TTCAlgorithm)
 
 
