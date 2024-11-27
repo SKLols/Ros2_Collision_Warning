@@ -260,7 +260,7 @@ namespace ros2_collision_detection {
          * @brief The number of circles used to represent an object.
          * 
          */
-        //int n;
+        int n;
 
         /**
          * @brief Represent the Object Motion struct as a string. 
@@ -353,12 +353,12 @@ namespace ros2_collision_detection {
 
         //static constexpr int DEFAULT_CIRCLE_COUNT = 1;
         //NCircleAlgorithm(): n(DEFAULT_CIRCLE_COUNT){}
-        int n;
+        //int n;
         
         //void initialize(double side_length) override {};
         void initialize(parameter_map_t &parameter_map) override ;
-        //int get_n() const { return n; }
-        //void set_n(int value) { n = value; }
+        int get_n() { return n; }
+        void set_n(int value) { n = value; }
 
         //double area() override;
 

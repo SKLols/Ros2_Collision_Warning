@@ -392,16 +392,16 @@ namespace ros2_collision_detection_plugins {
                 //this->n = 10;
             }
             
-            //int n
-            //{
-            //    int n = DEFAULT_CIRCLE_COUNT;
-            //    return n;
-            //}
+            ros2_collision_detection::NCircleAlgorithm NCA;
+
+            //int n_k = NCA.get_n(){return n;}
+            int n_k = NCA.get_n();
+            //cout  << n_k;
 
             void initialize(ros2_collision_detection::parameter_map_t &parameter_map)
             {
                 //ros2_collision_detection::NCircleAlgorithm NCA;
-
+                std::cout  << n_k;
                 try
                 {
                     std::variant<int, std::string> variant_circle_count = parameter_map.at("ttc_algorithm_circle_count");
@@ -411,22 +411,22 @@ namespace ros2_collision_detection_plugins {
                         if(circle_count >= 1)
                         {
                             //ros2_collision_detection::NCircleAlgorithm NCA;
-                            //NCA.set_n(cirlce_count);
-                            n = circle_count;
+                            //n_k= NCA.set_n(circle_count);
+                            n_k = circle_count;
                             RCLCPP_INFO(node_->get_logger(),"NCircleAlgorithm::init with n = %d.", circle_count);
                         }
                     }
                     else
                     {
-                        //NCA.set_n(DEFAULT_CIRCLE_COUNT);
-                        n = DEFAULT_CIRCLE_COUNT;
+                        //n_k=NCA.set_n(DEFAULT_CIRCLE_COUNT);
+                        n_k = DEFAULT_CIRCLE_COUNT;
                         RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::init: 'ttc_algorithm_circle_count' could not be retrieved. Using default n=%d.", DEFAULT_CIRCLE_COUNT);
                     }
                 }
                 catch(const std::out_of_range &e)
                 {
-                    //NCA.set_n(DEFAULT_CIRCLE_COUNT);
-                    n = DEFAULT_CIRCLE_COUNT;
+                    //n_k=CA.set_n(DEFAULT_CIRCLE_COUNT);
+                    n_k = DEFAULT_CIRCLE_COUNT;
                     RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::init: no 'ttc_algorithm_circle_count' found. Using default n=%d.", DEFAULT_CIRCLE_COUNT);
                 }
                 //RCLCPP_INFO(rclcpp::get_logger("NCircleAlgorithm"), "NCircleAlgorithm does  initialize.");
@@ -498,10 +498,13 @@ namespace ros2_collision_detection_plugins {
                 return front_bumper_pos - factor * (trigonometric_value * part_length);
             }
 
+            //int n_k = NCA.get_n()
+
             double computeRadius(const float &length, const float &width, const int &circle_count)
             {
                 // radius = sqrt( (length / (n+1))^2 + (width / 2)^2 )
-                double part_length = length / (n + 1);
+                
+                double part_length = length / (n_k + 1);
                 double half_width = width / 2;
                 double result = sqrt(part_length * part_length + half_width * half_width);
                 RCLCPP_DEBUG(node_->get_logger(),"NCircleAlgorithm::computeRadius: radius = %f | length: %f, width: %f, circle_count: %d", result, length, width, circle_count);
