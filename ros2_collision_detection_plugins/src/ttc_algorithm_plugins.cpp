@@ -4,6 +4,7 @@
 #include <cmath>
 #include <rclcpp/rclcpp.hpp>
 #include <optional>
+#include <variant>
 
 #define DEFAULT_CIRCLE_COUNT 1      //!< default number of circles if no circle_count is passed
 #define POLYNOMIAL_ARRAY_LENGTH 5   //!< quartic equation has variable of degree 0 to 4
@@ -382,11 +383,53 @@ namespace ros2_collision_detection_plugins {
 
     class NCircleAlgorithm : public ros2_collision_detection::TTCAlgorithm, public NodeInitializer
     {
+        
         public:
             NCircleAlgorithm()
             
             {
                 RCLCPP_INFO(node_->get_logger(), "CircleAlgorithm constructed");
+                //this->n = 10;
+            }
+            
+            //int n
+            //{
+            //    int n = DEFAULT_CIRCLE_COUNT;
+            //    return n;
+            //}
+
+            void initialize(ros2_collision_detection::parameter_map_t &parameter_map)
+            {
+                //ros2_collision_detection::NCircleAlgorithm NCA;
+
+                try
+                {
+                    std::variant<int, std::string> variant_circle_count = parameter_map.at("ttc_algorithm_circle_count");
+                    if(int *circle_count_ptr = std::get_if<int>(&variant_circle_count))
+                    {
+                        int circle_count = *circle_count_ptr;
+                        if(circle_count >= 1)
+                        {
+                            //ros2_collision_detection::NCircleAlgorithm NCA;
+                            //NCA.set_n(cirlce_count);
+                            n = circle_count;
+                            RCLCPP_INFO(node_->get_logger(),"NCircleAlgorithm::init with n = %d.", circle_count);
+                        }
+                    }
+                    else
+                    {
+                        //NCA.set_n(DEFAULT_CIRCLE_COUNT);
+                        n = DEFAULT_CIRCLE_COUNT;
+                        RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::init: 'ttc_algorithm_circle_count' could not be retrieved. Using default n=%d.", DEFAULT_CIRCLE_COUNT);
+                    }
+                }
+                catch(const std::out_of_range &e)
+                {
+                    //NCA.set_n(DEFAULT_CIRCLE_COUNT);
+                    n = DEFAULT_CIRCLE_COUNT;
+                    RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::init: no 'ttc_algorithm_circle_count' found. Using default n=%d.", DEFAULT_CIRCLE_COUNT);
+                }
+                //RCLCPP_INFO(rclcpp::get_logger("NCircleAlgorithm"), "NCircleAlgorithm does  initialize.");
             }
 
             std::string convertMotionStructToString(const ros2_collision_detection::object_motion_t& object_motion)
@@ -428,10 +471,44 @@ namespace ros2_collision_detection_plugins {
                 return result;
             }
 
-            void initialize(ros2_collision_detection::parameter_map_t &parameter_map) override
+            std::vector<std::array<double, 2>> computeAllCircleCenters(const double &front_bumper_pos_x, const double &front_bumper_pos_y, const double &sin_heading, const double &cos_heading, const double &length, const int &circle_count)
             {
-                RCLCPP_INFO(rclcpp::get_logger("NCircleAlgorithm"), "NCircleAlgorithm does  initialize.");
+                std::vector<std::array<double, 2>> circles;
+
+                for(int i = 0; i < circle_count; i++)
+                {
+                    int factor = i + 1;
+                    double part_length = length / (circle_count + 1);
+                    std::array<double, 2> circle_i_pos;
+                    circle_i_pos[0] = computeCircleCenter(front_bumper_pos_x, factor, sin_heading, part_length);
+                    circle_i_pos[1] = computeCircleCenter(front_bumper_pos_y, factor, cos_heading, part_length);
+                    circles.push_back(circle_i_pos);
+                }
+
+                RCLCPP_DEBUG(node_->get_logger(),"computeAllCircleCenters: all circles from: (%f,%f) with sin: %f, cos: %f, length: %f, circle_count: %d.", front_bumper_pos_x, front_bumper_pos_y, sin_heading, cos_heading, length, circle_count);
+                for(std::vector<std::array<double, 2>>::iterator it = circles.begin(); it != circles.end(); ++it)
+                {
+                    RCLCPP_DEBUG(node_->get_logger(),"circle center: (%f,%f).", (*it)[0], (*it)[1]);
+                }
+                return circles;
             }
+
+            double computeCircleCenter(const double &front_bumper_pos, const int &factor, const double &trigonometric_value, const double &part_length)
+            {
+                return front_bumper_pos - factor * (trigonometric_value * part_length);
+            }
+
+            double computeRadius(const float &length, const float &width, const int &circle_count)
+            {
+                // radius = sqrt( (length / (n+1))^2 + (width / 2)^2 )
+                double part_length = length / (n + 1);
+                double half_width = width / 2;
+                double result = sqrt(part_length * part_length + half_width * half_width);
+                RCLCPP_DEBUG(node_->get_logger(),"NCircleAlgorithm::computeRadius: radius = %f | length: %f, width: %f, circle_count: %d", result, length, width, circle_count);
+                return result;
+            }
+
+            //@todo: below part needs to be modified
 
             std::optional<double> calculateTTC(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion)
             {   

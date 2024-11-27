@@ -260,7 +260,7 @@ namespace ros2_collision_detection {
          * @brief The number of circles used to represent an object.
          * 
          */
-        int n;
+        //int n;
 
         /**
          * @brief Represent the Object Motion struct as a string. 
@@ -350,10 +350,15 @@ namespace ros2_collision_detection {
         std::vector<double> calculatePossibleTTCs(const object_motion_t &subject_object_motion, const object_motion_t &perceived_object_motion, int circle_count);
 
     public:
-        NCircleAlgorithm();
+
+        //static constexpr int DEFAULT_CIRCLE_COUNT = 1;
+        //NCircleAlgorithm(): n(DEFAULT_CIRCLE_COUNT){}
+        int n;
         
         //void initialize(double side_length) override {};
         void initialize(parameter_map_t &parameter_map) override ;
+        //int get_n() const { return n; }
+        //void set_n(int value) { n = value; }
 
         //double area() override;
 
