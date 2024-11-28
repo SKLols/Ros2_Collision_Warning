@@ -1,3 +1,4 @@
+#include <ros2_collision_detection/ros2_collision_detection__node.hpp>
 #include <cstdio>
 #include <pluginlib/class_loader.hpp>
 #include <ros2_collision_detection/ttc_algorithm.hpp>
