@@ -32,7 +32,7 @@ find_package( PkgConfig REQUIRED)
 
 #add_library(circle_algorithm src/circle_algorithm.cpp)
 #add_library(circle_equation_solver src/circle_equation_solver.cpp)
-add_library(n_circle_algorithm src/n_circle_algorithm.cpp)
+#add_library(n_circle_algorithm src/n_circle_algorithm.cpp)
 add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
 
 #target_include_directories(circle_algorithm PUBLIC
@@ -43,9 +43,9 @@ add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
 #  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 #  $<INSTALL_INTERFACE:include>)
 
-target_include_directories(n_circle_algorithm PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+#target_include_directories(n_circle_algorithm PUBLIC
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#  $<INSTALL_INTERFACE:include>)
 
 target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -72,15 +72,15 @@ target_include_directories(ttc_algorithm_plugins PUBLIC
 #  "Boost"
 #)
 
-ament_target_dependencies(
-  n_circle_algorithm
-  "ros2_collision_detection"
-  "pluginlib"
-  "rclcpp"
-  "rclpy"
-  "v2xvf_interfaces"
-  "Boost"
-)
+#ament_target_dependencies(
+#  n_circle_algorithm
+#  "ros2_collision_detection"
+#  "pluginlib"
+#  "rclcpp"
+#  "rclpy"
+#  "v2xvf_interfaces"
+#  "Boost"
+#)
 
 ament_target_dependencies(
   ttc_algorithm_plugins
@@ -106,7 +106,7 @@ install(
   TARGETS 
   #circle_algorithm
   #circle_equation_solver
-  n_circle_algorithm
+  #n_circle_algorithm
   ttc_algorithm_plugins
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
@@ -131,7 +131,7 @@ ament_export_include_directories(
 ament_export_libraries(
   #circle_algorithm
   #circle_equation_solver
-  n_circle_algorithm
+  #n_circle_algorithm
   ttc_algorithm_plugins
 )
 ament_export_targets(

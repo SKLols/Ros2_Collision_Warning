@@ -398,10 +398,10 @@ namespace ros2_collision_detection_plugins {
             int n_k = NCA.get_n();
             //cout  << n_k;
 
-            void initialize(ros2_collision_detection::parameter_map_t &parameter_map)
+            void initialize(ros2_collision_detection::parameter_map_t &parameter_map) override
             {
                 //ros2_collision_detection::NCircleAlgorithm NCA;
-                std::cout  << n_k;
+                
                 try
                 {
                     std::variant<int, std::string> variant_circle_count = parameter_map.at("ttc_algorithm_circle_count");
@@ -498,7 +498,6 @@ namespace ros2_collision_detection_plugins {
                 return front_bumper_pos - factor * (trigonometric_value * part_length);
             }
 
-            //int n_k = NCA.get_n()
 
             double computeRadius(const float &length, const float &width, const int &circle_count)
             {
@@ -511,29 +510,12 @@ namespace ros2_collision_detection_plugins {
                 return result;
             }
 
-            //@todo: below part needs to be modified
+            std::vector<double> calculatePossibleTTCs(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion, int circle_count)
+            {
+                // list of all computed TTCs from the collision checks between all subject object's circles and perceived object's circles
+                std::vector<double> possible_ttc_list;
 
-            std::optional<double> calculateTTC(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion)
-            {   
-                // the Time-To-Collision optional return value
-                std::optional<double> ttc_optional;
-
-                // log the received object motions
-                RCLCPP_DEBUG_STREAM(node_->get_logger(),"subject object motion: \n" << convertMotionStructToString(subject_object_motion));
-                RCLCPP_DEBUG_STREAM(node_->get_logger(),"perceived object motion: \n" << convertMotionStructToString(perceived_object_motion));
-
-                if(subject_object_motion.length <= 0 || subject_object_motion.width <= 0 || perceived_object_motion.length <= 0 || perceived_object_motion.width <= 0)
-                {
-                    RCLCPP_ERROR(node_->get_logger(),"CircleAlgorithm::calculateTTC: length or width is not allowed to be zero or lower.");
-                    return ttc_optional;
-                }
-
-                if(subject_object_motion.heading < 0 || subject_object_motion.heading > 360 || perceived_object_motion.heading < 0 || perceived_object_motion.heading > 360)
-                {
-                    RCLCPP_ERROR(node_->get_logger(),"CircleAlgorithm::calculateTTC: heading value must be in range [0; 360].");
-                    return ttc_optional;
-                }
-
+                // common values necessary for all circles
                 double sin_subject_obj_heading = computeSinFromHeading(subject_object_motion.heading);      //!< sin(alpha)
                 double cos_subject_obj_heading = computeCosFromHeading(subject_object_motion.heading);      //!< cos(alpha)
                 double sin_perceived_obj_heading = computeSinFromHeading(perceived_object_motion.heading);  //!< sin(beta)
@@ -549,60 +531,140 @@ namespace ros2_collision_detection_plugins {
                 double speed_perceived_obj_sin_adjusted = computeHeadingAdjustedValue(perceived_object_motion.speed, sin_perceived_obj_heading);    //!< sin(beta) * v_j
                 double speed_perceived_obj_cos_adjusted = computeHeadingAdjustedValue(perceived_object_motion.speed, cos_perceived_obj_heading);    //!< cos(beta) * v_j
 
-                //double radius_subject_obj = computeRadiusFromLength(subject_object_motion.length, subject_object_motion.width);        //!< r_i
-                //double radius_perceived_obj = computeRadiusFromLength(perceived_object_motion.length, perceived_object_motion.width);  //!< r_j
-
                 // differences between subject object's values and perceived object's values
                 double accel_diff_sin_adjusted = accel_subject_obj_sin_adjusted - accel_perceived_obj_sin_adjusted; //!< sin(alpha) * a_i - sin(beta) * a_j
                 double accel_diff_cos_adjusted = accel_subject_obj_cos_adjusted - accel_perceived_obj_cos_adjusted; //!< cos(alpha) * a_i - cos(beta) * a_j
                 double speed_diff_sin_adjusted = speed_subject_obj_sin_adjusted - speed_perceived_obj_sin_adjusted; //!< sin(alpha) * v_i - sin(beta) * v_j
                 double speed_diff_cos_adjusted = speed_subject_obj_cos_adjusted - speed_perceived_obj_cos_adjusted; //!< cos(alpha) * v_i - cos(beta) * v_j
-                double center_pos_x_diff = subject_object_motion.center_pos_x - perceived_object_motion.center_pos_x;   //!< x_i - x_j
-                double center_pos_y_diff = subject_object_motion.center_pos_y - perceived_object_motion.center_pos_y;   //!< y_i - y_j
-
-                // sum of the radii of subject object and perceived object
-                //double radius_sum = radius_subject_obj + radius_perceived_obj;  //!< r_i + r_j
 
                 // squares of the differences
                 double accel_diff_square_sin_adjusted = accel_diff_sin_adjusted * accel_diff_sin_adjusted;  //!< (sin(alpha) * a_i - sin(beta) * a_j)^2
                 double accel_diff_square_cos_adjusted = accel_diff_cos_adjusted * accel_diff_cos_adjusted;  //!< (cos(alpha) * a_i - cos(beta) * a_j)^2
                 double speed_diff_square_sin_adjusted = speed_diff_sin_adjusted * speed_diff_sin_adjusted;  //!< (sin(alpha) * v_i - sin(beta) * v_j)^2
                 double speed_diff_square_cos_adjusted = speed_diff_cos_adjusted * speed_diff_cos_adjusted;  //!< (cos(alpha) * v_i - cos(beta) * v_j)^2
-                double center_pos_x_diff_square = center_pos_x_diff * center_pos_x_diff;    //!< (x_i - x_j)^2
-                double center_pos_y_diff_square = center_pos_y_diff * center_pos_y_diff;    //!< (y_i - y_j)^2
+
+                // compute front bumper position for subject object and perceived object
+                double front_bumper_pos_x_subject_obj = computeFrontBumperPos(subject_object_motion.center_pos_x, sin_subject_obj_heading, subject_object_motion.length);
+                double front_bumper_pos_y_subject_obj = computeFrontBumperPos(subject_object_motion.center_pos_y, cos_subject_obj_heading, subject_object_motion.length);
+
+                double front_bumper_pos_x_perceived_obj = computeFrontBumperPos(perceived_object_motion.center_pos_x, sin_perceived_obj_heading, perceived_object_motion.length);
+                double front_bumper_pos_y_perceived_obj = computeFrontBumperPos(perceived_object_motion.center_pos_y, cos_perceived_obj_heading, perceived_object_motion.length);
+
+                // split the line [front_bumper_pos, rear_bumper_pos] for subject object and perceived object into n+1 equally long parts and
+                // compute coordinates of the n circle centers for subject object and perceived object
+                std::vector<std::array<double, 2>> circles_subject_obj = computeAllCircleCenters(front_bumper_pos_x_subject_obj, front_bumper_pos_y_subject_obj, sin_subject_obj_heading, cos_subject_obj_heading, subject_object_motion.length, n_k);
+                std::vector<std::array<double, 2>> circles_perceived_obj = computeAllCircleCenters(front_bumper_pos_x_perceived_obj, front_bumper_pos_y_perceived_obj, sin_perceived_obj_heading, cos_perceived_obj_heading, perceived_object_motion.length, n_k);
+
+                // compute the radius for the n circles for subject object and perceived object
+                double circle_radius_subject_obj = computeRadius(subject_object_motion.length, subject_object_motion.width, n_k);        //!< r_i
+                double circle_radius_perceived_obj = computeRadius(perceived_object_motion.length, perceived_object_motion.width, n_k);  //!< r_j
+
+                // sum of the radii of subject object and perceived object
+                double radius_sum = circle_radius_subject_obj + circle_radius_perceived_obj;  //!< r_i + r_j
 
                 // square of the sum of the radii
-                //double radius_sum_square = radius_sum * radius_sum; //!< (r_i + r_j)^2
+                double radius_sum_square = radius_sum * radius_sum; //!< (r_i + r_j)^2
 
-                // prepare coefficients of the polynomial P(t) = b_0 + b_1 * t^1 + b_2 * t^2 + b_3 * t^3 + b_4 * t^4
-                // stored upwards from least power: [b_0, b_1, b_2, b_3, b_4]
-
-                CircleEquationSolver CES;
+                // the coefficients for polynomial equation stored upwards from least power: [b_0, b_1, b_2, b_3, b_4]
                 std::array<double, POLYNOMIAL_ARRAY_LENGTH> coefficients;
-                //coefficients[0] = CES.computeCoefficientForPowerZero(center_pos_x_diff_square, center_pos_y_diff_square, radius_sum_square);
-                coefficients[1] = CES.computeCoefficientForPowerOne(speed_diff_sin_adjusted, speed_diff_cos_adjusted, center_pos_x_diff, center_pos_y_diff);
-                coefficients[2] = CES.computeCoefficientForPowerTwo(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_square_sin_adjusted, speed_diff_square_cos_adjusted, center_pos_x_diff, center_pos_y_diff);
-                coefficients[3] = CES.computeCoefficientForPowerThree(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_sin_adjusted, speed_diff_cos_adjusted);
-                coefficients[4] = CES.computeCoefficientForPowerFour(accel_diff_square_sin_adjusted, accel_diff_square_cos_adjusted);
 
-                // compute the real roots of the polynomial equation with GSL
-                std::vector<double> real_positive_roots = CES.solvePolynomialEquationGSL(coefficients);
+                // the real roots of the polynomial equation
+                std::vector<double> real_positive_roots;
 
-                if (real_positive_roots.empty())
+                // collision check between all subject obj circles and perceived obj circles
+                for(int i = 0; i < n_k; i++)      // for all subject obj circles
                 {
-                    // no real positive root found --> no TTC could be computed
-                    RCLCPP_DEBUG(node_->get_logger(),"CircleAlgorithm::calculateTTC: no real positive roots found.");
+                    for(int j = 0; j < n_k; j++)  // for all perceived obj circles
+                    {
+                        RCLCPP_DEBUG(node_->get_logger(),"NCircleAlgorithm::calculatePossibleTTCs Computing for i=%d, j=%d: subject (%f,%f) | perceived (%f,%f).", i, j, circles_subject_obj.at(i).at(0), circles_subject_obj.at(i).at(1), circles_perceived_obj.at(j).at(0), circles_perceived_obj.at(j).at(1));
+                        double circle_center_pos_x_diff = circles_subject_obj.at(i).at(0) - circles_perceived_obj.at(j).at(0);   //!< x_i - x_j
+                        double circle_center_pos_y_diff = circles_subject_obj.at(i).at(1) - circles_perceived_obj.at(j).at(1);   //!< y_i - y_j
+
+                        // squares of the differences        
+                        double circle_center_pos_x_diff_square = circle_center_pos_x_diff * circle_center_pos_x_diff;    //!< (x_i - x_j)^2
+                        double circle_center_pos_y_diff_square = circle_center_pos_y_diff * circle_center_pos_y_diff;    //!< (y_i - y_j)^2
+
+                        CircleEquationSolver CES;
+
+                        // prepare coefficients of the polynomial P(t) = b_0 + b_1 * t^1 + b_2 * t^2 + b_3 * t^3 + b_4 * t^4
+                        coefficients[0] = CES.computeCoefficientForPowerZero(circle_center_pos_x_diff_square, circle_center_pos_y_diff_square, radius_sum_square);
+                        coefficients[1] = CES.computeCoefficientForPowerOne(speed_diff_sin_adjusted, speed_diff_cos_adjusted, circle_center_pos_x_diff, circle_center_pos_y_diff);
+                        coefficients[2] = CES.computeCoefficientForPowerTwo(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_square_sin_adjusted, speed_diff_square_cos_adjusted, circle_center_pos_x_diff, circle_center_pos_y_diff);
+                        coefficients[3] = CES.computeCoefficientForPowerThree(accel_diff_sin_adjusted, accel_diff_cos_adjusted, speed_diff_sin_adjusted, speed_diff_cos_adjusted);
+                        coefficients[4] = CES.computeCoefficientForPowerFour(accel_diff_square_sin_adjusted, accel_diff_square_cos_adjusted);
+
+                        // compute the real roots of the polynomial equation with GSL
+                        real_positive_roots = CES.solvePolynomialEquationGSL(coefficients);
+
+                        if (real_positive_roots.empty())
+                        {
+                            // no real positive root found --> no TTC could be computed
+                            // no TTC between the two currently used circles
+                            RCLCPP_DEBUG(node_->get_logger(),"NCircleAlgorithm::calculatePossibleTTCs: no real positive roots found.");
+                        }
+                        else
+                        {
+                            // at least one real positive root found
+                            // smallest real positive root is the TTC for the two currently used circles
+                            double ttc_circles_i_j = *std::min_element(real_positive_roots.begin(), real_positive_roots.end());
+                            possible_ttc_list.push_back(ttc_circles_i_j);
+                        }
+
+                    }
+                }
+
+                return possible_ttc_list;
+            }
+
+            std::optional<double> calculateTTC(const ros2_collision_detection::object_motion_t &subject_object_motion, const ros2_collision_detection::object_motion_t &perceived_object_motion)
+            {   
+                // the Time-To-Collision optional return value
+                std::optional<double> ttc_optional;
+
+                // log the received object motions
+                RCLCPP_DEBUG_STREAM(node_->get_logger(),"\nsubject object motion: \n" << convertMotionStructToString(subject_object_motion));
+                RCLCPP_DEBUG_STREAM(node_->get_logger(),"perceived object motion: \n" << convertMotionStructToString(perceived_object_motion));
+
+                if(subject_object_motion.length <= 0 || subject_object_motion.width <= 0 || perceived_object_motion.length <= 0 || perceived_object_motion.width <= 0)
+                {
+                    RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::calculateTTC: length or width is not allowed to be zero or lower.");
+                    return ttc_optional;
+                }
+
+                if(subject_object_motion.heading < 0 || subject_object_motion.heading > 360 || perceived_object_motion.heading < 0 || perceived_object_motion.heading > 360)
+                {
+                    RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::calculateTTC: heading value must be in range [0; 360].");
+                    return ttc_optional;
+                }
+
+                // calculate all possible TTCs between subject_object_motion and perceived_object_motion, each represented by n circles
+                std::vector<double> possible_ttc_list = calculatePossibleTTCs(subject_object_motion, perceived_object_motion, n_k);
+
+                if(possible_ttc_list.empty())
+                {
+                    // no possible TTC computed between any of the circles --> no TTC could be computed
+                    RCLCPP_INFO(node_->get_logger(),"NCircleAlgorithm::calculateTTC: no TTC could be found.");
 
                     // return empty optional
                     return ttc_optional;
                 }
 
-                // smallest real positive root is the TTC
-                ttc_optional = *std::min_element(real_positive_roots.begin(), real_positive_roots.end());
+                // smallest of the possible TTCs is the TTC
+                RCLCPP_ERROR(node_->get_logger(),"NCircleAlgorithm::calculateTTC: list of possible TTCs:");
+                for(int i = 0; i < possible_ttc_list.size(); i++)
+                {RCLCPP_ERROR(node_->get_logger(),"possible ttc [%d] = %f", i, possible_ttc_list[i]);
+                }
+
+                ttc_optional = *std::min_element(possible_ttc_list.begin(), possible_ttc_list.end());
 
                 return ttc_optional;
+            }
+
+            //@todo: below part needs to be modified
+
             
-            };
+            
+        
     };
 
     
@@ -614,5 +676,6 @@ namespace ros2_collision_detection_plugins {
 
 PLUGINLIB_EXPORT_CLASS(ros2_collision_detection_plugins::CircleAlgorithm, ros2_collision_detection::TTCAlgorithm)
 PLUGINLIB_EXPORT_CLASS(ros2_collision_detection_plugins::NCircleAlgorithm, ros2_collision_detection::TTCAlgorithm)
+
 
 

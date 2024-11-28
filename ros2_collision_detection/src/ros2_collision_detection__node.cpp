@@ -54,8 +54,8 @@ int main(int argc, char **argv)
         circle_algorithm->initialize(param_map);
         //circle_algorithm->initialize(10.0);
 
-        //std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_equation_solver = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleEquationSolver");
-        //circle_equation_solver->initialize(10.0);
+        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> n_circle_algorithm = poly_loader.createSharedInstance("ros2_collision_detection_plugins::NCircleAlgorithm");
+        n_circle_algorithm->initialize(param_map);
 
         //double accel_diff_sq_sin_adj = 2.0;  // Example value
         //double accel_diff_sq_cos_adj = 4.0;  // Example value

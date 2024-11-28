@@ -351,14 +351,14 @@ namespace ros2_collision_detection {
 
     public:
 
-        //static constexpr int DEFAULT_CIRCLE_COUNT = 1;
-        //NCircleAlgorithm(): n(DEFAULT_CIRCLE_COUNT){}
-        //int n;
+        NCircleAlgorithm();
         
-        //void initialize(double side_length) override {};
-        void initialize(parameter_map_t &parameter_map) override ;
         int get_n() { return n; }
         void set_n(int value) { n = value; }
+
+        //void initialize(double side_length) override {};
+        void initialize(parameter_map_t &parameter_map) override ;
+        
 
         //double area() override;
 
