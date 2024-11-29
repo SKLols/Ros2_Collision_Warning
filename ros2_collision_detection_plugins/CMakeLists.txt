@@ -89,7 +89,7 @@ ament_target_dependencies(
   "rclcpp"
   "rclpy"
   "v2xvf_interfaces"
-  "Boost"
+  #"Boost"
 )
 
 pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
