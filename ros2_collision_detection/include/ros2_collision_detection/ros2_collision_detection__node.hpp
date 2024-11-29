@@ -75,25 +75,25 @@ class CollisionDetection
          * @brief ROS message filters subscriber to topic "/fused_objects".
          * 
          */
-        message_filters::Subscriber<v2xvf_interfaces::msg::PerceivedObjects> fused_objects_subscriber;
+        //message_filters::Subscriber<v2xvf_interfaces::msg::PerceivedObjects> fused_objects_subscriber;
 
         /**
          * @brief ROS message filters subscriber to topic "ego_position".
          * 
          */
-        message_filters::Subscriber<v2xvf_interfaces::msg::SubjectVehicleMotion> ego_position_subscriber;
+        //message_filters::Subscriber<v2xvf_interfaces::msg::SubjectVehicleMotion> ego_position_subscriber;
 
         /**
          * @brief ROS message filters synchronizer that uses approximate sync policy.
          * 
          */
-        message_filters::Synchronizer<ApproximateSyncPolicy> approximate_synchronizer;
+        //message_filters::Synchronizer<ApproximateSyncPolicy> approximate_synchronizer;
 
         /**
         * @brief ROS publisher for collision warnings to topic "/collision_warning".
         * 
         */
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr collision_warning_publisher;
+        rclcpp::Publisher<v2xvf_interfaces::msg::CollisionCheckResult>::SharedPtr collision_warning_publisher;
 
         /**
          * @brief Object responsible for calculating Time-To-Collision from received ROS messages.

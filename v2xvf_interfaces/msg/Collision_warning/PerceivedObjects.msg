@@ -1,5 +1,5 @@
 # header, contains time stamp
-Header header
+std_msgs/Header header
 
 # array of all perceived objects' motion
 PerceivedObjectMotion[] perceived_objects

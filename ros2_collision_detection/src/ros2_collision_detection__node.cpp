@@ -1,3 +1,18 @@
+/**
+ * @file collision_detection.h
+ * @author Michael Wittmann (miw2006@thi.de)
+ * @brief Header for Collision Detection class.
+ * @version 0.1
+ * @date 2022-04-13
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * @author Sourabh Lolge (sol9471@thi.de)
+ * @date 2024-11-29
+ * @brief Updated from ROS 1 to ROS 2.
+ * 
+ */
+
 #include <ros2_collision_detection/ros2_collision_detection__node.hpp>
 #include <cstdio>
 #include <pluginlib/class_loader.hpp>
@@ -20,25 +35,87 @@
 #define DEFAULT_SUBJECT_VEHICLE_LENGTH 5
 #define DEFAULT_SUBJECT_VEHICLE_WIDTH 1.8
 
-//class CollisionDetection : public rclcpp::Node
-//{
-//    public:
-//        CollisionDetection()
-//         : Node ("collision_detection")
-//          //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
-//          //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
-//          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
-//          //warning_generator(collision_warning_publisher)
-//        {
-//           CollisionDetection::init(); //Publishers and subscribers
-//        }
-//
-//        void init()
-//        {
-//            //main logic
-//        }
-//};
+CollisionDetection::CollisionDetection(std::shared_ptr<rclcpp::Node> nh) 
+:ttc_algorithm_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm")
+//approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber)
+{
+    node_handle = nh;
+    CollisionDetection::init();
+}
 
+void CollisionDetection::init()
+{
+    // initialize the components with launch parameter values
+    initFromLaunchParameters();
+
+    // register callback from ttc_calculator to warning_generator
+    //ttc_calculator.addWarningSignalCallback(boost::bind(&WarningGenerator::createWarning, &warning_generator, _1, _2, _3)); 
+    
+    //@todo
+    collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>("/collision_warning", 10);
+    //fused_objects_subscriber.subscribe(*node_handle, "/fused_objects", 100);
+    //ego_position_subscriber.subscribe(*node_handle, "/ego_position", 100);
+    //approximate_synchronizer.registerCallback(boost::bind(&CollisionDetection::callback, this, _1, _2));
+    
+    // log successful init
+    RCLCPP_INFO(node_handle->get_logger(),"collision_detection node successfully initialized.");
+}
+
+void CollisionDetection::initFromLaunchParameters()
+{
+    // Check launch parameters and set defaults if necessary
+    checkLaunchParameters();
+
+    // load the concrete TTC Algorithm and Warning Generator classes
+    loadPlugins();
+
+    // initialize TTC Calculator and Warning Generator components with launch parameters
+    initComponents();
+}
+
+
+void CollisionDetection::checkLaunchParameters()
+{
+
+}
+
+void CollisionDetection::loadPlugins()
+{
+
+}
+
+void CollisionDetection::initComponents()
+{
+    std::cout << "Structure Ready";
+}
+
+int main(int argc, char **argv) 
+{
+    //Intialise ROS2 Node
+    //ros::init(argc, argv, "collision_detecion",ros::init_options::AnonymousName); // create anonymous node if node if same name exists
+    rclcpp::init(argc, argv);
+    
+    //Create anonymous node
+    std::string node_name = "collision_detection";
+    std::string unique_node_name = node_name + "_" + std::to_string(rand()); //to_string used to convert a value of fundam,ental type (integer, float) to its corresponding string representation
+
+    //ros::NodeHandle nh;
+    auto nh = std::make_shared<rclcpp::Node>(unique_node_name);
+
+    //Log initialization
+    RCLCPP_INFO(nh->get_logger(), "Node successfully initialized.");
+
+    //CollisionDetection collision_detection(&nh);
+    CollisionDetection collision_detection(nh);
+
+    // Spin the node
+    rclcpp::spin(nh);
+
+    // Shutdown the ROS 2 system
+    rclcpp::shutdown();
+}
+
+/*
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);  // Initialize ROS 2
@@ -96,54 +173,4 @@ int main(int argc, char **argv)
     return 0;
     
 }
-
-
-
-
-
-//class CollisionDetection : public rclcpp::Node
-//{
-//    public:
-//        CollisionDetection()
-//         : Node ("collision_detection")
-//          //ttc_algorithm_loader("ros2_collision_detection", "TTCAlgorithm"),
-//          //warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
-//          //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
-//          //warning_generator(collision_warning_publisher)
-//        {
-//           CollisionDetection::init(); //Publishers and subscribers
-//        }
-//
-//        void init()
-//        {
-//            //main logic
-//        }
-//};
-//
-//int main(int argc, char ** argv)
-//{
-//    rclcpp::init(argc,argv); //initialise ros2
-//
-//    auto collision_detection_node = std::make_shared<CollisionDetection>();
-//
-//    printf("initial setup successfully.\n");
-//
-//    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
-//  
-//    try 
-//    {
-//      // Try to load the CircleAlgorithm plugin
-//      std::shared_ptr<ros2_collision_detection::TTCAlgorithm> plugin = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-//      printf("CircleAlgorithm plugin loaded successfully.");
-//    } 
-//    catch (pluginlib::PluginlibException& ex) 
-//    {
-//      printf("Failed to load plugin: %s \n", ex.what());
-//    }
-//
-//    rclcpp::spin(collision_detection_node);
-//    rclcpp::shutdown();
-//
-//    return 0;
-//}
-//
+*/
