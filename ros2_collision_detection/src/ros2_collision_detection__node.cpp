@@ -29,7 +29,7 @@
 
 // definition of default values for launch parameters
 #define DEFAULT_PUBLISH_TOPIC "/collision_warning"
-#define DEFAULT_TTC_ALGORITHM_CLASSNAME "CircleAlgorithm"
+#define DEFAULT_TTC_ALGORITHM_CLASSNAME "ros2_collision_detection_plugins::CircleAlgorithm"
 #define DEFAULT_WARNING_GENERATOR_ALGORITHM_CLASSNAME "TTCOnlyWarningAlgorithm"
 #define DEFAULT_TTC_ALGORITHM_CIRCLE_COUNT 1
 #define DEFAULT_SUBJECT_VEHICLE_LENGTH 5
@@ -61,6 +61,7 @@ void CollisionDetection::init()
     RCLCPP_INFO(node_handle->get_logger(),"collision_detection node successfully initialized.");
 }
 
+//initFromLaunchParameters function Completed
 void CollisionDetection::initFromLaunchParameters()
 {
     // Check launch parameters and set defaults if necessary
@@ -73,22 +74,102 @@ void CollisionDetection::initFromLaunchParameters()
     initComponents();
 }
 
-
+//checkLaunchParameters function Completed
 void CollisionDetection::checkLaunchParameters()
 {
+    if (!node_handle->has_parameter("publish_topic"))
+    {
+        // Default value for param "publish_topic" is DEFAULT_PUBLISH_TOPIC
+        node_handle->declare_parameter("publish_topic", DEFAULT_PUBLISH_TOPIC);
+        RCLCPP_WARN(node_handle->get_logger(),"CollisionDetection::loadPlugins: using default value for 'publish_topic'.");
+    }
+
+    if (!node_handle->has_parameter("ttc_algorithm_classname"))
+    {
+        // Default value for param "ttc_algorithm_classname" is DEFAULT_TTC_ALGORITHM_CLASSNAME
+        node_handle->declare_parameter("ttc_algorithm_classname", DEFAULT_TTC_ALGORITHM_CLASSNAME);
+        RCLCPP_WARN(node_handle->get_logger(), "CollisionDetection::loadPlugins: using default value for 'ttc_algorithm_classname'.");
+    }
+
+    if (!node_handle->has_parameter("warning_generator_algorithm_classname"))
+    {
+        // Default value for param "warning_generator_algorithm_classname" is DEFAULT_WARNING_GENERATOR_ALGORITHM_CLASSNAME
+        node_handle->declare_parameter("warning_generator_algorithm_classname", DEFAULT_WARNING_GENERATOR_ALGORITHM_CLASSNAME);
+        RCLCPP_WARN(node_handle->get_logger(),"CollisionDetection::loadPlugins: using default value for 'warning_generator_algorithm_classname'.");
+    }
+
+    if (!node_handle->has_parameter("ttc_algorithm_circle_count"))
+    {
+        // Default value for param "ttc_algorithm_circle_count" is DEFAULT_TTC_ALGORITHM_CIRCLE_COUNT
+        node_handle->declare_parameter("ttc_algorithm_circle_count", DEFAULT_TTC_ALGORITHM_CIRCLE_COUNT);
+        RCLCPP_WARN(node_handle->get_logger(),"CollisionDetection::loadPlugins: using default value for 'ttc_algorithm_circle_count'.");
+    }
+
+    if (!node_handle->has_parameter("subject_vehicle_length"))
+    {
+        // Default value for param "subject_vehicle_length" is DEFAULT_SUBJECT_VEHICLE_LENGTH
+        node_handle->declare_parameter("subject_vehicle_length", DEFAULT_SUBJECT_VEHICLE_LENGTH);
+        RCLCPP_WARN(node_handle->get_logger(),"CollisionDetection::loadPlugins: using default value for 'subject_vehicle_length'.");
+    }
+
+    if (!node_handle->has_parameter("subject_vehicle_width"))
+    {
+        // Default value for param "subject_vehicle_width" is DEFAULT_SUBJECT_VEHICLE_WIDTH
+        node_handle->declare_parameter("subject_vehicle_width", DEFAULT_SUBJECT_VEHICLE_WIDTH);
+        RCLCPP_WARN(node_handle->get_logger(),"CollisionDetection::loadPlugins: using default value for 'subject_vehicle_width'.");
+    }    
 
 }
 
 void CollisionDetection::loadPlugins()
 {
+    std::string ttc_algorithm_classname; //!< The name of the TTC Algorithm class to load
+    int ttc_algorithm_circle_count;      //!< The number of circles that should be used to represent a vehicle
+    ros2_collision_detection::parameter_map_t param_map;           //!< The parameters that are passed to the init method of the TTC Algorithm
+
+    if(node_handle->get_parameter("ttc_algorithm_classname", ttc_algorithm_classname))
+    {
+        if(node_handle->get_parameter("ttc_algorithm_circle_count", ttc_algorithm_circle_count))
+        {
+            param_map.insert({"ttc_algorithm_circle_count", std::variant<int, std::string>(ttc_algorithm_circle_count)}); 
+
+            try
+            {
+                std::shared_ptr<ros2_collision_detection::TTCAlgorithm> ttc_algorithm_ptr = ttc_algorithm_loader.createSharedInstance(ttc_algorithm_classname);
+                ttc_algorithm_ptr->initialize(param_map); // init before shared pointer ownership changes
+                //ttc_calculator.setTTCAlgorithm(ttc_algorithm_ptr);
+            }
+            catch(pluginlib::PluginlibException& e)
+            {
+                RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: cannot load TTC Algorithm plugin: %s", e.what());
+                rclcpp::shutdown();
+                exit(0);
+            }
+
+        }
+        else
+        {
+            RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: parameter 'ttc_algorithm_circle_count' could not be retrieved.");
+            rclcpp::shutdown();
+            exit(0);   
+        }
+
+    }
+    else
+    {
+        RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: parameter 'ttc_algorithm_classname' could not be retrieved.");
+        rclcpp::shutdown();
+        exit(0);
+    }
 
 }
 
 void CollisionDetection::initComponents()
 {
-    std::cout << "Structure Ready";
+    std::cout << "Structure Ready" << std::endl;
 }
 
+//Main function Completed
 int main(int argc, char **argv) 
 {
     //Intialise ROS2 Node
