@@ -27,6 +27,14 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_poly.h>
 
+
+#include <ros2_collision_detection/enum_result_type.hpp>
+#include "ros2_collision_detection/warning_generator_algorithm.hpp"
+#include "ros2_collision_detection/warning_generator.hpp"
+#include "ros2_collision_detection/ttc_only_warning_algorithm.hpp"
+#include "ros2_collision_detection/ttc_calculator.hpp"
+
+
 // definition of default values for launch parameters_
 #define DEFAULT_PUBLISH_TOPIC "/collision_warning"
 #define DEFAULT_TTC_ALGORITHM_CLASSNAME "ros2_collision_detection_plugins::CircleAlgorithm"
