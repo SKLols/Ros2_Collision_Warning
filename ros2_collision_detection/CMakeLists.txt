@@ -27,7 +27,7 @@ find_package( PkgConfig REQUIRED)
 
 pkg_check_modules( gsl REQUIRED gsl )
 
-add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp src/warning_generator.cpp)
+add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp src/warning_generator.cpp src/ttc_only_warning_algorithm.cpp)
 target_include_directories(ros2_collision_detection__node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
