@@ -30,6 +30,8 @@
 class WarningGenerator
 {
 private:
+    std::shared_ptr<rclcpp::Node> node_handle;
+
     /**
      * @brief Shared pointer to an concrete instance of the WarningGeneratorAlgorithm interface.
      * 
@@ -55,21 +57,21 @@ public:
      * 
      * @param publisher ROS publisher for collision warnings.
      */
-    WarningGenerator(rclcpp::Publisher<v2xvf_interfaces::msg::CollisionCheckResult>::SharedPtr &publisher);
+    WarningGenerator(rclcpp::Publisher<v2xvf_interfaces::msg::CollisionCheckResult>::SharedPtr publisher);
 
     /**
      * @brief Set the Warning Generator Algorithm member variable.
      * 
      * @param algorithm Pointer to an concrete instance of a class that implements the interface WarningGeneratorAlgorithm.
      */
-    void setWarningGeneratorAlgorithm(std::shared_ptr<WarningGeneratorAlgorithm> &algorithm);
+    void setWarningGeneratorAlgorithm(std::shared_ptr<WarningGeneratorAlgorithm> algorithm);
 
     /**
      * @brief Set the Collision Warning Publisher member variable.
      * 
      * @param publisher ROS publisher for collision warnings.
      */
-    void setCollisionWarningPublisher(rclcpp::Publisher<v2xvf_interfaces::msg::CollisionCheckResult>::SharedPtr &publisher);
+    void setCollisionWarningPublisher(rclcpp::Publisher<v2xvf_interfaces::msg::CollisionCheckResult>::SharedPtr publisher);
 
     /**
      * @brief Generate a collision warning and publish it.
@@ -83,7 +85,7 @@ public:
      */
     void createWarning(
         const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, 
-        const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg,
+        const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg,
         double ttc
     );
 };

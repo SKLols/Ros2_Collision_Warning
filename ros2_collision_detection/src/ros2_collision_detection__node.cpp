@@ -28,11 +28,11 @@
 #include <gsl/gsl_poly.h>
 
 
-#include <ros2_collision_detection/enum_result_type.hpp>
-#include "ros2_collision_detection/warning_generator_algorithm.hpp"
-#include "ros2_collision_detection/warning_generator.hpp"
-#include "ros2_collision_detection/ttc_only_warning_algorithm.hpp"
-#include "ros2_collision_detection/ttc_calculator.hpp"
+//#include <ros2_collision_detection/enum_result_type.hpp>
+//#include "ros2_collision_detection/warning_generator_algorithm.hpp"
+//#include "ros2_collision_detection/warning_generator.hpp"
+//#include "ros2_collision_detection/ttc_only_warning_algorithm.hpp"
+//#include "ros2_collision_detection/ttc_calculator.hpp"
 
 
 // definition of default values for launch parameters_
