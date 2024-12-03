@@ -34,6 +34,8 @@ find_package( PkgConfig REQUIRED)
 #add_library(circle_equation_solver src/circle_equation_solver.cpp)
 #add_library(n_circle_algorithm src/n_circle_algorithm.cpp)
 add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
+add_library(warning_generator_algorithm_plugins src/warning_generator_algorithm_plugins.cpp)
+
 
 #target_include_directories(circle_algorithm PUBLIC
 #  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -51,6 +53,10 @@ target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${gsl_LIBRARIES})
+
+  target_include_directories(warning_generator_algorithm_plugins PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
 #ament_target_dependencies(
 #  circle_algorithm
@@ -92,11 +98,22 @@ ament_target_dependencies(
   "Boost"
 )
 
-pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
+ament_target_dependencies(
+  warning_generator_algorithm_plugins
+  "ros2_collision_detection"
+  "pluginlib"
+  "rclcpp"
+  "rclpy"
+  "v2xvf_interfaces"
+  "Boost"
+)
+
+pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml warning_generator_algorithm_plugins.xml)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(ttc_algorithm_plugins PRIVATE "ROS2_COLLISION_DETECTION_PLUGINS_BUILDING_LIBRARY")
+target_compile_definitions(warning_generator_algorithm_plugins PRIVATE "ROS2_COLLISION_DETECTION_PLUGINS_BUILDING_LIBRARY")
 
 install(
   DIRECTORY include/
@@ -108,6 +125,8 @@ install(
   #circle_equation_solver
   #n_circle_algorithm
   ttc_algorithm_plugins
+  warning_generator_algorithm_plugins
+
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -133,6 +152,7 @@ ament_export_libraries(
   #circle_equation_solver
   #n_circle_algorithm
   ttc_algorithm_plugins
+  warning_generator_algorithm_plugins
 )
 ament_export_targets(
   export_${PROJECT_NAME}
