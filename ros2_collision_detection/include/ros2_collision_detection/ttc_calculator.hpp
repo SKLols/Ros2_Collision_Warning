@@ -136,14 +136,6 @@ public:
      */
     void setSubjectVehicleDimensions(float length, float width);
 
-    float getLengthSubjectVehicle() const {
-        return length_subject_vehicle;
-    }
-
-    float getWidthSubjectVehicle() const {
-        return width_subject_vehicle;
-    }
-
     /**
      * @brief Calculate all TTCs between the Subject Vehicle Motion and all Perceived Object Motions.
      * 
@@ -153,7 +145,7 @@ public:
      * @param perceived_objects_msg The Perceived Objects message that contains several Perceived Object Motions.
      * @param subject_vehicle_motion_msg The Subject Vehicle Motion message.
      */
-    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg);
+    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg);
 
 };
 

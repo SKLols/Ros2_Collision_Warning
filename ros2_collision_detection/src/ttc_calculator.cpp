@@ -19,10 +19,8 @@
 
 TTCCalculator::TTCCalculator()
 :ttc_algorithm(nullptr)
-{
-    TTCCalculator ttc_calculator;
-    //@todo: 
-    ttc_calculator.setSubjectVehicleDimensions(DEFAULT_LENGTH_SUBJECT_VEHICLE, DEFAULT_WIDTH_SUBJECT_VEHICLE);
+{ 
+    setSubjectVehicleDimensions(DEFAULT_LENGTH_SUBJECT_VEHICLE, DEFAULT_WIDTH_SUBJECT_VEHICLE);
     RCLCPP_DEBUG(node_handle->get_logger(),"TTCCalculator::TTCCalculator constructed with default subject vehicle dimensions: length = %f, width = %f", length_subject_vehicle, width_subject_vehicle);
 }
 
@@ -36,11 +34,6 @@ void TTCCalculator::addWarningSignalCallback(const warning_signal_t::slot_type& 
 {
     warning_signal.connect(signal_subscriber);
 }
-
-TTCCalculator ttc_calculator;
-
-float length_subject_vehicle_=ttc_calculator.getLengthSubjectVehicle();
-float width_subject_vehicle_=ttc_calculator.getWidthSubjectVehicle();
 
 void TTCCalculator::setSubjectVehicleDimensions(float length, float width)
 {
@@ -70,14 +63,14 @@ void TTCCalculator::sendWarningSignalCallback(const v2xvf_interfaces::msg::Subje
     }
 }
 
-ros2_collision_detection::object_motion_t createObjectMotionFromSubjectVehicleMotion(const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
+ros2_collision_detection::object_motion_t TTCCalculator::createObjectMotionFromSubjectVehicleMotion(const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
 {
     ros2_collision_detection::object_motion_t result;
     
     result.center_pos_x = subject_vehicle_motion_msg->vehicle_movement.position.x;
     result.center_pos_y = subject_vehicle_motion_msg->vehicle_movement.position.y;
-    result.length = length_subject_vehicle_;
-    result.width = width_subject_vehicle_;
+    result.length = length_subject_vehicle;
+    result.width = width_subject_vehicle;
     result.heading = subject_vehicle_motion_msg->vehicle_movement.heading;
     result.speed = subject_vehicle_motion_msg->vehicle_movement.speed;
     result.acceleration = subject_vehicle_motion_msg->vehicle_movement.acceleration;
@@ -121,16 +114,16 @@ void TTCCalculator::handleTTCResult(std::optional<double> &ttc_optional, const v
     }
 }
 
-void TTCCalculator::calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
+void TTCCalculator::calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
 {
     // store the subject vehicle's motion data (vehicle i) for use with all perceived objects
     ros2_collision_detection::object_motion_t subject_vehicle_motion = createObjectMotionFromSubjectVehicleMotion(subject_vehicle_motion_msg);
 
-    int perceived_objects_count = perceived_object_msg->perceived_objects.size();
+    int perceived_objects_count = perceived_objects_msg->perceived_objects.size();
 
     for(int i = 0; i < perceived_objects_count; i++)
     {
-        v2xvf_interfaces::msg::PerceivedObjectMotion perceived_object = perceived_object_msg->perceived_objects[i];
+        v2xvf_interfaces::msg::PerceivedObjectMotion perceived_object = perceived_objects_msg->perceived_objects[i];
         std::shared_ptr<v2xvf_interfaces::msg::PerceivedObjectMotion> perceived_object_msg = std::make_shared<v2xvf_interfaces::msg::PerceivedObjectMotion>(perceived_object);
         ros2_collision_detection::object_motion_t perceived_object_motion = createObjectMotionFromPerceivedObjectMotion(perceived_object_msg);
         uint32_t perceived_object_id = perceived_object.object_movement.id;
