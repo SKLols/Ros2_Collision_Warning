@@ -32,9 +32,9 @@
 
 #include <ros2_collision_detection/ttc_algorithm.hpp>
 //@todo below 3 files
-//#include <ros2_collision_detection/ttc_calculator.hpp>
-//#include <ros2_collision_detection/warning_generator.hpp>
-//#include <ros2_collision_detection/ttc_only_warning_algorithm.hpp>
+#include <ros2_collision_detection/ttc_calculator.hpp>
+#include <ros2_collision_detection/warning_generator.hpp>
+#include <ros2_collision_detection/ttc_only_warning_algorithm.hpp>
 
 /**
  * @brief Typedef for a approximate sync policy that synchronizes a PerceivedObjects message with a SubjectVehicleMotion message.
@@ -68,20 +68,20 @@ class CollisionDetection
          * @brief Class loader that can load classes that implement interface WarningGeneratorAlgorithm.
          * 
          */
-        //@todo
-        //pluginlib::ClassLoader<WarningGeneratorAlgorithm> warning_generator_algorithm_loader;
+        
+        pluginlib::ClassLoader<WarningGeneratorAlgorithm> warning_generator_algorithm_loader;
 
         /**
          * @brief ROS message filters subscriber to topic "/fused_objects".
          * 
          */
-        //message_filters::Subscriber<v2xvf_interfaces::msg::PerceivedObjects> fused_objects_subscriber;
+        message_filters::Subscriber<v2xvf_interfaces::msg::PerceivedObjects> fused_objects_subscriber;
 
         /**
          * @brief ROS message filters subscriber to topic "ego_position".
          * 
          */
-        //message_filters::Subscriber<v2xvf_interfaces::msg::SubjectVehicleMotion> ego_position_subscriber;
+        message_filters::Subscriber<v2xvf_interfaces::msg::SubjectVehicleMotion> ego_position_subscriber;
 
         /**
          * @brief ROS message filters synchronizer that uses approximate sync policy.
@@ -99,15 +99,15 @@ class CollisionDetection
          * @brief Object responsible for calculating Time-To-Collision from received ROS messages.
          * 
          */
-        //@todo
-        //TTCCalculator ttc_calculator;
+        
+        TTCCalculator ttc_calculator;
 
         /**
          * @brief Object responsible for generating and sending collision warnings.
          * 
          */
-        //@todo
-        //WarningGenerator warning_generator;
+        
+        WarningGenerator warning_generator;
 
         /**
          * @brief Initialize the subscribers, the synchronizer and the publisher.

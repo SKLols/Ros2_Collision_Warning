@@ -44,25 +44,33 @@
 #define DEFAULT_SUBJECT_VEHICLE_WIDTH 1.8
 
 CollisionDetection::CollisionDetection(std::shared_ptr<rclcpp::Node> nh) 
-:ttc_algorithm_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm")
-//approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber)
+:ttc_algorithm_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm"),
+warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
+//approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
+warning_generator(collision_warning_publisher)
 {
+    RCLCPP_INFO(nh->get_logger(), "Node successfully initialized-0.");
     node_handle = nh;
     CollisionDetection::init();
 }
 
+
 void CollisionDetection::init()
 {
+    RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-2.");
+
     // initialize the components with launch parameter values
     initFromLaunchParameters();
 
+    RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-3.");
+
     // register callback from ttc_calculator to warning_generator
-    //ttc_calculator.addWarningSignalCallback(boost::bind(&WarningGenerator::createWarning, &warning_generator, _1, _2, _3)); 
-    
+    ttc_calculator.addWarningSignalCallback(boost::bind(&WarningGenerator::createWarning, &warning_generator, _1, _2, _3)); 
+    RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-4.");
     //@todo
     collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>("/collision_warning", 10);
-    //fused_objects_subscriber.subscribe(*node_handle, "/fused_objects", 100);
-    //ego_position_subscriber.subscribe(*node_handle, "/ego_position", 100);
+    fused_objects_subscriber.subscribe(node_handle, "/fused_objects");
+    ego_position_subscriber.subscribe(node_handle, "/ego_position");
     //approximate_synchronizer.registerCallback(boost::bind(&CollisionDetection::callback, this, _1, _2));
     
     // log successful init
@@ -145,7 +153,7 @@ void CollisionDetection::loadPlugins()
             {
                 std::shared_ptr<ros2_collision_detection::TTCAlgorithm> ttc_algorithm_ptr = ttc_algorithm_loader.createSharedInstance(ttc_algorithm_classname);
                 ttc_algorithm_ptr->initialize(param_map); // init before shared pointer ownership changes
-                //ttc_calculator.setTTCAlgorithm(ttc_algorithm_ptr);
+                ttc_calculator.setTTCAlgorithm(ttc_algorithm_ptr);
             }
             catch(pluginlib::PluginlibException& e)
             {
@@ -170,11 +178,76 @@ void CollisionDetection::loadPlugins()
         exit(0);
     }
 
+    std::string warning_generator_algorithm_classname; //!< The name of the Warning Generator Algorithm class to load
+    
+    if(node_handle->get_parameter("warning_generator_algorithm_classname", warning_generator_algorithm_classname))
+    {
+        try
+        {
+            std::shared_ptr<WarningGeneratorAlgorithm> warning_generator_algorithm_ptr = warning_generator_algorithm_loader.createSharedInstance(warning_generator_algorithm_classname);
+            warning_generator.setWarningGeneratorAlgorithm(warning_generator_algorithm_ptr);
+        }
+        catch(pluginlib::PluginlibException& e)
+        {
+            RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: cannot load Warning Generator Algorithm plugin: %s", e.what());
+            rclcpp::shutdown();
+            exit(0);
+        }
+    }
+    else
+    {
+        RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: parameter 'warning_generator_algorithm_classname' could not be retrieved.");
+        rclcpp::shutdown();
+        exit(0);
+    }
+
 }
 
+//initComponents function Completed
 void CollisionDetection::initComponents()
 {
-    std::cout << "Structure Ready" << std::endl;
+    std::string publish_topic_name;
+    if(node_handle->get_parameter("publish_topic", publish_topic_name))
+    {
+        collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>(publish_topic_name, 10);
+    }
+    else
+    {
+        RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::initComponents: parameter 'publish_topic' could not be retrieved.");
+        rclcpp::shutdown();
+        exit(0);
+    }
+
+    float subject_vehicle_length;   //!< The length of the subject vehicle
+    float subject_vehicle_width;    //!< The width of the subject vehicle
+
+    bool subject_vehicle_length_retrieved = node_handle->get_parameter("subject_vehicle_length", subject_vehicle_length);
+    bool subject_vehicle_width_retrieved = node_handle->get_parameter("subject_vehicle_width", subject_vehicle_width);
+
+    if(!subject_vehicle_length_retrieved)
+    {
+        RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::initComponents: parameter 'subject_vehicle_length' could not be retrieved.");
+        rclcpp::shutdown();
+        exit(0);
+    }
+
+    if(!subject_vehicle_width_retrieved)
+    {
+        RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::initComponents: parameter 'subject_vehicle_width' could not be retrieved.");
+        rclcpp::shutdown();
+        exit(0);
+    }
+
+    // dimensions of subject vehicle successfully retrieved
+    ttc_calculator.setSubjectVehicleDimensions(subject_vehicle_length, subject_vehicle_width);
+}
+
+void CollisionDetection::callback(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
+{
+    // log seq number of the two messages
+    //RCLCPP_DEBUG(node_handle->get_logger(),"CollisionDetection::callback: Subject vehicle msg: seq = %d | perceived object msg: seq = %d.", subject_vehicle_motion_msg->header.seq, perceived_objects_msg->header.seq);
+    
+    ttc_calculator.calculateAllTTCs(perceived_objects_msg, subject_vehicle_motion_msg);
 }
 
 //Main function Completed
@@ -192,7 +265,7 @@ int main(int argc, char **argv)
     auto nh = std::make_shared<rclcpp::Node>(unique_node_name);
 
     //Log initialization
-    RCLCPP_INFO(nh->get_logger(), "Node successfully initialized.");
+    RCLCPP_INFO(nh->get_logger(), "Node successfully initialized-1.");
 
     //CollisionDetection collision_detection(&nh);
     CollisionDetection collision_detection(nh);

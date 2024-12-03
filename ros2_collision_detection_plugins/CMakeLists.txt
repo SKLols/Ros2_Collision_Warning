@@ -108,7 +108,8 @@ ament_target_dependencies(
   "Boost"
 )
 
-pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml warning_generator_algorithm_plugins.xml)
+pluginlib_export_plugin_description_file(ros2_collision_detection ttc_algorithm_plugins.xml)
+pluginlib_export_plugin_description_file(ros2_collision_detection warning_generator_algorithm_plugins.xml)
 
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
