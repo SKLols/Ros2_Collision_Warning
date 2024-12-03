@@ -20,8 +20,9 @@ TTCOnlyWarningAlgorithm::TTCOnlyWarningAlgorithm()
     RCLCPP_INFO(node_handle->get_logger(),"TTCOnlyWarningAlgorithm::TTCOnlyWarningAlgorithm constructed.");
 }
 
-ResultType TTCOnlyWarningAlgorithm::generateWarning(const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, 
-            const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg,
+ResultType TTCOnlyWarningAlgorithm::generateWarning(
+            const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, 
+            const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg,
             double ttc)
 {
     // TTC thresholds like Honda Collision Mitgation Braking System (CMBS)

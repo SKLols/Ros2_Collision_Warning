@@ -31,7 +31,7 @@
  * The callback function returns void.
  * 
  */
-typedef boost::signals2::signal<void (const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr, const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr, double)> warning_signal_t;
+typedef boost::signals2::signal<void (const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr, const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr, double)> warning_signal_t;
 
 /**
  * @brief Class that manages the Time-To-Collision calculation and passes valid TTCs to the Warning Generator.
@@ -41,6 +41,8 @@ typedef boost::signals2::signal<void (const v2xvf_interfaces::msg::SubjectVehicl
 class TTCCalculator
 {
 private:
+    std::shared_ptr<rclcpp::Node> node_handle;
+
     /**
      * @brief Shared pointer to an concrete instance of the TTCAlgorithm interface.
      * 
@@ -74,7 +76,7 @@ private:
      * @param perceived_object_motion_msg The Perceived Object Motion message used for TTC calculation.
      * @param ttc The Time-To-Collision computed between the Subject Vehicle and the Perceived Object.
      */
-    void sendWarningSignalCallback(const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg, double ttc);
+    void sendWarningSignalCallback(const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg, double ttc);
 
     /**
      * @brief Create a Object Motion from Subject Vehicle Motion object.
@@ -90,7 +92,7 @@ private:
      * @param perceived_object_motion_msg The Perceived Object Motion message to be used for Object Motion.
      * @return Object Motion struct representing the Perceived Object Motion. 
      */
-    ros2_collision_detection::object_motion_t createObjectMotionFromPerceivedObjectMotion(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg);
+    ros2_collision_detection::object_motion_t createObjectMotionFromPerceivedObjectMotion(const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg);
 
     /**
      * @brief Deal with the TTC optional from the TTC calculation.
@@ -99,7 +101,7 @@ private:
      * @param subject_vehicle_motion_msg The Subject Vehicle Motion message used for TTC calculation.
      * @param perceived_object_motion_msg The Perceived Object Motion message used for TTC calculation.
      */
-    void handleTTCResult(std::optional<double> &ttc_optional, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg);
+    void handleTTCResult(std::optional<double> &ttc_optional, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg);
 
 public:
     /**
@@ -134,6 +136,14 @@ public:
      */
     void setSubjectVehicleDimensions(float length, float width);
 
+    float getLengthSubjectVehicle() const {
+        return length_subject_vehicle;
+    }
+
+    float getWidthSubjectVehicle() const {
+        return width_subject_vehicle;
+    }
+
     /**
      * @brief Calculate all TTCs between the Subject Vehicle Motion and all Perceived Object Motions.
      * 
@@ -143,7 +153,7 @@ public:
      * @param perceived_objects_msg The Perceived Objects message that contains several Perceived Object Motions.
      * @param subject_vehicle_motion_msg The Subject Vehicle Motion message.
      */
-    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_motion_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg);
+    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_object_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg);
 
 };
 
