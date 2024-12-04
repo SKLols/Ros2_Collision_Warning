@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug ROS 2 Node with GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/ettusb2102/Sourabh/Ros2/Ros2_Collision_Warning/install/ros2_collision_detection/lib/ros2_collision_detection/ros2_collision_detection__node",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for GDB",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "miDebuggerArgs": "",
+            "logging": {
+                "moduleLoad": false,
+                "programOutput": true,
+                "trace": true,
+                "traceResponse": true
+            },
+            "sourceFileMap": {
+                "/opt/ros/foxy": "${workspaceFolder}/src/ros2_workspace/ros2_install"
+            }
+        }
+    ]
+}
