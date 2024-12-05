@@ -145,7 +145,7 @@ public:
      * @param perceived_objects_msg The Perceived Objects message that contains several Perceived Object Motions.
      * @param subject_vehicle_motion_msg The Subject Vehicle Motion message.
      */
-    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg);
+    void calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr& perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg);
 
 };
 

@@ -19,6 +19,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <pluginlib/class_loader.hpp>
+#include <boost/bind.hpp>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -48,7 +49,7 @@ using ApproximateSyncPolicy = message_filters::sync_policies::ApproximateTime<v2
  * 
  */
 
-class CollisionDetection
+class CollisionDetection : public rclcpp::Node
 {
     private:
         /**
@@ -87,7 +88,7 @@ class CollisionDetection
          * @brief ROS message filters synchronizer that uses approximate sync policy.
          * 
          */
-        //message_filters::Synchronizer<ApproximateSyncPolicy> approximate_synchronizer;
+        message_filters::Synchronizer<ApproximateSyncPolicy> approximate_synchronizer;
 
         /**
         * @brief ROS publisher for collision warnings to topic "/collision_warning".
@@ -162,8 +163,8 @@ class CollisionDetection
      */
     //void callback(const ros_collision_detection::PerceivedObjectsConstPtr& perceived_objects_msg, const ros_collision_detection::SubjectVehicleMotionConstPtr& subject_vehicle_motion_msg);
     void callback(
-        const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg,
-        const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg
+        const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr& perceived_objects_msg,
+        const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg
     );
 
 

@@ -14,18 +14,18 @@
  */
 
 #include <ros2_collision_detection/ros2_collision_detection__node.hpp>
-#include <cstdio>
-#include <pluginlib/class_loader.hpp>
-#include <ros2_collision_detection/ttc_algorithm.hpp>
-#include "rclcpp/rclcpp.hpp"
-#include "v2xvf_interfaces/msg/collision_check_result.hpp"
-#include "v2xvf_interfaces/msg/object_movement.hpp"
-#include "v2xvf_interfaces/msg/perceived_object_motion.hpp"
-#include "v2xvf_interfaces/msg/perceived_objects.hpp"
-#include "v2xvf_interfaces/msg/subject_vehicle_motion.hpp"
-#include <boost/shared_ptr.hpp>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_poly.h>
+//#include <cstdio>
+//#include <pluginlib/class_loader.hpp>
+//#include <ros2_collision_detection/ttc_algorithm.hpp>
+//#include "rclcpp/rclcpp.hpp"
+//#include "v2xvf_interfaces/msg/collision_check_result.hpp"
+//#include "v2xvf_interfaces/msg/object_movement.hpp"
+//#include "v2xvf_interfaces/msg/perceived_object_motion.hpp"
+//#include "v2xvf_interfaces/msg/perceived_objects.hpp"
+//#include "v2xvf_interfaces/msg/subject_vehicle_motion.hpp"
+//#include <boost/shared_ptr.hpp>
+//#include <gsl/gsl_errno.h>
+//#include <gsl/gsl_poly.h>
 
 
 //#include <ros2_collision_detection/enum_result_type.hpp>
@@ -43,10 +43,12 @@
 #define DEFAULT_SUBJECT_VEHICLE_LENGTH 5
 #define DEFAULT_SUBJECT_VEHICLE_WIDTH 1.8
 
-CollisionDetection::CollisionDetection(std::shared_ptr<rclcpp::Node> nh) 
-:ttc_algorithm_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm"),
+
+CollisionDetection::CollisionDetection(std::shared_ptr<rclcpp::Node> nh)
+: Node("Collision_Detection"),
+ttc_algorithm_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm"),
 warning_generator_algorithm_loader("ros2_collision_detection", "WarningGeneratorAlgorithm"),
-//approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
+approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
 warning_generator(collision_warning_publisher)
 {
     RCLCPP_INFO(nh->get_logger(), "Node successfully initialized-0.");
@@ -68,10 +70,10 @@ void CollisionDetection::init()
     ttc_calculator.addWarningSignalCallback(boost::bind(&WarningGenerator::createWarning, &warning_generator, _1, _2, _3)); 
     RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-4.");
     //@todo
-    collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>("/collision_warning", 10);
+    //collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>("/collision_warning", 10);
     fused_objects_subscriber.subscribe(node_handle, "/fused_objects");
     ego_position_subscriber.subscribe(node_handle, "/ego_position");
-    //approximate_synchronizer.registerCallback(boost::bind(&CollisionDetection::callback, this, _1, _2));
+    approximate_synchronizer.registerCallback(boost::bind(&CollisionDetection::callback, this, _1, _2));
     
     // log successful init
     RCLCPP_INFO(node_handle->get_logger(),"collision_detection node successfully initialized.");
@@ -154,7 +156,7 @@ void CollisionDetection::loadPlugins()
                 std::shared_ptr<ros2_collision_detection::TTCAlgorithm> ttc_algorithm_ptr = ttc_algorithm_loader.createSharedInstance(ttc_algorithm_classname);
                 ttc_algorithm_ptr->initialize(param_map); // init before shared pointer ownership changes
                 ttc_calculator.setTTCAlgorithm(ttc_algorithm_ptr);
-            }
+            }       
             catch(pluginlib::PluginlibException& e)
             {
                 RCLCPP_FATAL(node_handle->get_logger(),"CollisionDetection::loadPlugins: cannot load TTC Algorithm plugin: %s", e.what());
@@ -242,10 +244,10 @@ void CollisionDetection::initComponents()
     ttc_calculator.setSubjectVehicleDimensions(subject_vehicle_length, subject_vehicle_width);
 }
 
-void CollisionDetection::callback(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
+void CollisionDetection::callback(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr& perceived_objects_msg,const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg)
 {
     // log seq number of the two messages
-    //RCLCPP_DEBUG(node_handle->get_logger(),"CollisionDetection::callback: Subject vehicle msg: seq = %d | perceived object msg: seq = %d.", subject_vehicle_motion_msg->header.seq, perceived_objects_msg->header.seq);
+    RCLCPP_DEBUG(node_handle->get_logger(),"CollisionDetection::callback: Subject vehicle msg: seq = %d | perceived object msg: seq = %d.", subject_vehicle_motion_msg->header.stamp.sec, subject_vehicle_motion_msg->header.stamp.nanosec, perceived_objects_msg->header.stamp.sec, perceived_objects_msg->header.stamp.nanosec);
     
     ttc_calculator.calculateAllTTCs(perceived_objects_msg, subject_vehicle_motion_msg);
 }
@@ -276,63 +278,3 @@ int main(int argc, char **argv)
     // Shutdown the ROS 2 system
     rclcpp::shutdown();
 }
-
-/*
-int main(int argc, char **argv)
-{
-    rclcpp::init(argc, argv);  // Initialize ROS 2
-
-    // Create a ROS 2 Node for logging
-    auto node = std::make_shared<rclcpp::Node>("collision_detection_node");
-
-    // Load the plugin using ClassLoader
-    pluginlib::ClassLoader<ros2_collision_detection::TTCAlgorithm> poly_loader("ros2_collision_detection", "ros2_collision_detection::TTCAlgorithm");
-    ros2_collision_detection::parameter_map_t param_map;
-    try {
-        // Load the plugin (circle algorithm in this case)
-        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> circle_algorithm = poly_loader.createSharedInstance("ros2_collision_detection_plugins::CircleAlgorithm");
-        circle_algorithm->initialize(param_map);
-        //circle_algorithm->initialize(10.0);
-
-        std::shared_ptr<ros2_collision_detection::TTCAlgorithm> n_circle_algorithm = poly_loader.createSharedInstance("ros2_collision_detection_plugins::NCircleAlgorithm");
-        n_circle_algorithm->initialize(param_map);
-
-        //double accel_diff_sq_sin_adj = 2.0;  // Example value
-        //double accel_diff_sq_cos_adj = 4.0;  // Example value
-
-        //double result = circle_algorithm->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
-        //double result_equation = circle_equation_solver->computeCoefficientForPowerFour(accel_diff_sq_sin_adj, accel_diff_sq_cos_adj);
-
-        // Create and populate the parameter_map_t
-        //ros2_collision_detection::parameter_map_t parameter_map;
-        //parameter_map["side_length"] = 10;  // Example: Side length for CircleAlgorithm
-
-        // Pass the populated map to init
-        //plugin->init(parameter_map);
-
-        //RCLCPP_INFO(node->get_logger(), "Circle area: %.2f", circle_algorithm->area());
-        //RCLCPP_INFO(node->get_logger(), "Circle Equation Solver area: %.2f", circle_equation_solver->area());
-        //RCLCPP_INFO(node->get_logger(), "Result of computeCoefficientForPowerFour: %.2f", result);
-        //RCLCPP_INFO(node->get_logger(), "Result of equation computeCoefficientForPowerFour: %.2f", result_equation);
-        // Test the plugin's functionality
-        //ros2_collision_detection::object_motion_t subject = {0, 0, 10, 5, 0, 20, 0};
-        //ros2_collision_detection::object_motion_t perceived = {10, 10, 10, 5, 0, 20, 0};
-        //auto ttc = plugin->calculateTTC(subject, perceived);
-        //if (ttc) {
-        //    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "TTC: %f", *ttc);
-
-        
-        }
-
-    catch (pluginlib::PluginlibException& ex) {
-        printf("The plugin failed to load for some reason. Error: %s\n", ex.what());
-        //RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to load plugin: %s", ex.what());
-    }
-
-    rclcpp::spin(node);
-
-    rclcpp::shutdown();
-    return 0;
-    
-}
-*/

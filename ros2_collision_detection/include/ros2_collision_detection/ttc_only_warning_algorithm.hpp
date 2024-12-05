@@ -45,8 +45,8 @@ public:
      * @return Warning Result Type that defines the collision warning level based on TTC thresholds.
      */
     ResultType generateWarning(
-            const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, 
-            const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg,
+            const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg, 
+            const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr& perceived_object_motion_msg,
             double ttc
      ) override;
 };

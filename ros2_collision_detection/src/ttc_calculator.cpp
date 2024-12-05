@@ -114,7 +114,7 @@ void TTCCalculator::handleTTCResult(std::optional<double> &ttc_optional, const v
     }
 }
 
-void TTCCalculator::calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg)
+void TTCCalculator::calculateAllTTCs(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr& perceived_objects_msg, const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg)
 {
     // store the subject vehicle's motion data (vehicle i) for use with all perceived objects
     ros2_collision_detection::object_motion_t subject_vehicle_motion = createObjectMotionFromSubjectVehicleMotion(subject_vehicle_motion_msg);

@@ -84,8 +84,8 @@ public:
      * @param ttc The Time-To-Collision computed between the Subject Vehicle and the Perceived Object.
      */
     void createWarning(
-        const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr subject_vehicle_motion_msg, 
-        const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr perceived_object_motion_msg,
+        const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg, 
+        const v2xvf_interfaces::msg::PerceivedObjectMotion::SharedPtr& perceived_object_motion_msg,
         double ttc
     );
 };

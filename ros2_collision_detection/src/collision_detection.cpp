@@ -23,6 +23,7 @@ class CollisionDetection : public rclcpp::Node
           //approximate_synchronizer(ApproximateSyncPolicy(10), fused_objects_subscriber, ego_position_subscriber),
           //warning_generator(collision_warning_publisher)
         {
+           RCLCPP_INFO(nh->get_logger(), "Node successfully initialized-0.");
            CollisionDetection::init(); //Publishers and subscribers
         }
 
