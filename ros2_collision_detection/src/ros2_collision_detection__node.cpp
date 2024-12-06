@@ -14,25 +14,6 @@
  */
 
 #include <ros2_collision_detection/ros2_collision_detection__node.hpp>
-//#include <cstdio>
-//#include <pluginlib/class_loader.hpp>
-//#include <ros2_collision_detection/ttc_algorithm.hpp>
-//#include "rclcpp/rclcpp.hpp"
-//#include "v2xvf_interfaces/msg/collision_check_result.hpp"
-//#include "v2xvf_interfaces/msg/object_movement.hpp"
-//#include "v2xvf_interfaces/msg/perceived_object_motion.hpp"
-//#include "v2xvf_interfaces/msg/perceived_objects.hpp"
-//#include "v2xvf_interfaces/msg/subject_vehicle_motion.hpp"
-//#include <boost/shared_ptr.hpp>
-//#include <gsl/gsl_errno.h>
-//#include <gsl/gsl_poly.h>
-
-
-//#include <ros2_collision_detection/enum_result_type.hpp>
-//#include "ros2_collision_detection/warning_generator_algorithm.hpp"
-//#include "ros2_collision_detection/warning_generator.hpp"
-//#include "ros2_collision_detection/ttc_only_warning_algorithm.hpp"
-//#include "ros2_collision_detection/ttc_calculator.hpp"
 
 
 // definition of default values for launch parameters_
@@ -66,14 +47,22 @@ void CollisionDetection::init()
 
     RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-3.");
 
-    // register callback from ttc_calculator to warning_generator
-    ttc_calculator.addWarningSignalCallback(boost::bind(&WarningGenerator::createWarning, &warning_generator, _1, _2, _3)); 
+ // register callback from ttc_calculator to warning_generator
+    std::function<void(std::shared_ptr<const v2xvf_interfaces::msg::SubjectVehicleMotion>, 
+                       std::shared_ptr<const v2xvf_interfaces::msg::PerceivedObjectMotion>, 
+                       double)>
+        bound_function = std::bind(&WarningGenerator::createWarning, &warning_generator, 
+                                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
+    // Pass the bound function to the callback
+    ttc_calculator.addWarningSignalCallback(bound_function);   
+    
     RCLCPP_INFO(node_handle->get_logger(), "Node successfully initialized-4.");
     //@todo
     //collision_warning_publisher = node_handle->create_publisher<v2xvf_interfaces::msg::CollisionCheckResult>("/collision_warning", 10);
     fused_objects_subscriber.subscribe(node_handle, "/fused_objects");
     ego_position_subscriber.subscribe(node_handle, "/ego_position");
-    approximate_synchronizer.registerCallback(boost::bind(&CollisionDetection::callback, this, _1, _2));
+    approximate_synchronizer.registerCallback(std::bind(&CollisionDetection::callback, this, std::placeholders::_1, std::placeholders::_2));
     
     // log successful init
     RCLCPP_INFO(node_handle->get_logger(),"collision_detection node successfully initialized.");
@@ -244,7 +233,7 @@ void CollisionDetection::initComponents()
     ttc_calculator.setSubjectVehicleDimensions(subject_vehicle_length, subject_vehicle_width);
 }
 
-void CollisionDetection::callback(const v2xvf_interfaces::msg::PerceivedObjects::SharedPtr& perceived_objects_msg,const v2xvf_interfaces::msg::SubjectVehicleMotion::SharedPtr& subject_vehicle_motion_msg)
+void CollisionDetection::callback(const v2xvf_interfaces::msg::PerceivedObjects::ConstSharedPtr& perceived_objects_msg,const v2xvf_interfaces::msg::SubjectVehicleMotion::ConstSharedPtr& subject_vehicle_motion_msg)
 {
     // log seq number of the two messages
     RCLCPP_DEBUG(node_handle->get_logger(),"CollisionDetection::callback: Subject vehicle msg: seq = %d | perceived object msg: seq = %d.", subject_vehicle_motion_msg->header.stamp.sec, subject_vehicle_motion_msg->header.stamp.nanosec, perceived_objects_msg->header.stamp.sec, perceived_objects_msg->header.stamp.nanosec);

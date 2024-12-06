@@ -21,6 +21,7 @@ find_package(pluginlib REQUIRED)
 find_package(v2xvf_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED)  # Added Boost dependency
+find_package(message_filters REQUIRED)
 
 #Add gsl Library
 find_package( PkgConfig REQUIRED)
@@ -29,6 +30,7 @@ pkg_check_modules( gsl REQUIRED gsl )
 
 include_directories(
   include
+  ${message_filters_INCLUDE_DIRS}
 )
 
 add_executable(ros2_collision_detection__node src/ros2_collision_detection__node.cpp src/ttc_calculator.cpp src/warning_generator.cpp src/ttc_only_warning_algorithm.cpp)
@@ -48,6 +50,10 @@ target_link_libraries( ros2_collision_detection__node ${gsl_LIBRARIES} )
 # Link Boost libraries
 target_link_libraries(ros2_collision_detection__node
   ${Boost_LIBRARIES}  # Link Boost shared_ptr library
+)
+
+target_link_libraries(ros2_collision_detection__node
+    ${message_filters_LIBRARIES}  # Add this line
 )
 
 install(
