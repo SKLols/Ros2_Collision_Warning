@@ -29,64 +29,17 @@ find_package(Boost REQUIRED) #Newly Added
 #Add gsl Library
 find_package( PkgConfig REQUIRED)
 
-
-#add_library(circle_algorithm src/circle_algorithm.cpp)
-#add_library(circle_equation_solver src/circle_equation_solver.cpp)
-#add_library(n_circle_algorithm src/n_circle_algorithm.cpp)
 add_library(ttc_algorithm_plugins src/ttc_algorithm_plugins.cpp)
 add_library(warning_generator_algorithm_plugins src/warning_generator_algorithm_plugins.cpp)
-
-
-#target_include_directories(circle_algorithm PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#  $<INSTALL_INTERFACE:include>)
-
-#target_include_directories(circle_equation_solver PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#  $<INSTALL_INTERFACE:include>)
-
-#target_include_directories(n_circle_algorithm PUBLIC
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#  $<INSTALL_INTERFACE:include>)
 
 target_include_directories(ttc_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
   ${gsl_LIBRARIES})
 
-  target_include_directories(warning_generator_algorithm_plugins PUBLIC
+target_include_directories(warning_generator_algorithm_plugins PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-
-#ament_target_dependencies(
-#  circle_algorithm
-#  "ros2_collision_detection"
-#  "pluginlib"
-#  "rclcpp"
-#  "rclpy"
-#  "v2xvf_interfaces"
-#  "Boost"
-#)
-
-#ament_target_dependencies(
-#  circle_equation_solver
-#  "ros2_collision_detection"
-#  "pluginlib"
-#  "rclcpp"
-#  "rclpy"
-#  "v2xvf_interfaces"
-#  "Boost"
-#)
-
-#ament_target_dependencies(
-#  n_circle_algorithm
-#  "ros2_collision_detection"
-#  "pluginlib"
-#  "rclcpp"
-#  "rclpy"
-#  "v2xvf_interfaces"
-#  "Boost"
-#)
 
 ament_target_dependencies(
   ttc_algorithm_plugins
@@ -122,9 +75,6 @@ install(
 )
 install(
   TARGETS 
-  #circle_algorithm
-  #circle_equation_solver
-  #n_circle_algorithm
   ttc_algorithm_plugins
   warning_generator_algorithm_plugins
 
